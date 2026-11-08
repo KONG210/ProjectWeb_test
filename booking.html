@@ -1,0 +1,528 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>จองห้อง — NIRA Residence</title>
+<link rel="icon" href="assets/img/favicon.png" type="image/png">
+<link rel="apple-touch-icon" href="assets/img/apple-touch-icon.png">
+<link rel="stylesheet" href="assets/theme.css">
+<style>
+.page{padding:calc(var(--nav-h) + 40px) 0 90px;}
+.checkout{display:grid;grid-template-columns:1fr 380px;gap:32px;align-items:start;}
+@media(max-width:1020px){.checkout{grid-template-columns:1fr;}}
+.steps{display:flex;gap:0;margin-bottom:38px;overflow-x:auto;}
+.step{flex:1;min-width:118px;position:relative;padding-top:34px;text-align:center;font-size:13px;color:var(--muted-2);}
+.step::before{content:"";position:absolute;top:11px;left:0;right:0;height:2px;background:var(--line);}
+.step:first-child::before{left:50%;} .step:last-child::before{right:50%;}
+.step .b{position:absolute;top:0;left:50%;transform:translateX(-50%);width:24px;height:24px;border-radius:50%;background:var(--surface-2);border:2px solid var(--line);display:grid;place-items:center;font-size:11px;font-weight:700;z-index:2;}
+.step.done::before,.step.on::before{background:var(--accent);}
+.step.done .b{background:var(--accent);border-color:var(--accent);color:#0A0A0A;}
+.step.on .b{background:var(--accent);border-color:var(--accent);color:#0A0A0A;box-shadow:0 0 0 5px rgba(214,255,102,.15);}
+.step.on,.step.done{color:var(--text);}
+.pane{display:none;} .pane.on{display:block;}
+.summary{position:sticky;top:calc(var(--nav-h) + 20px);}
+.payopt{display:grid;gap:12px;}
+.payopt label{display:flex;gap:13px;align-items:flex-start;padding:16px 18px;border:1px solid var(--line);border-radius:var(--r-md);cursor:pointer;background:var(--surface-2);transition:.2s;}
+.payopt label:hover{border-color:var(--line-strong);}
+.payopt input{margin-top:3px;accent-color:var(--accent);}
+.payopt input:checked ~ .pinfo{color:#fff;}
+.payopt label:has(input:checked){border-color:rgba(214,255,102,.5);background:rgba(214,255,102,.05);}
+.qr{width:200px;height:200px;background:#fff;border-radius:14px;padding:12px;margin:0 auto;}
+.dropzone{border:1.5px dashed var(--line-strong);border-radius:var(--r-md);padding:30px;text-align:center;cursor:pointer;transition:.2s;}
+.dropzone:hover{border-color:var(--accent);background:var(--accent-ghost);}
+.planopt{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;}
+@media(max-width:760px){.planopt{grid-template-columns:1fr;}}
+.planopt label{border:1px solid var(--line);border-radius:var(--r-md);padding:20px;cursor:pointer;display:block;background:var(--surface-2);transition:.2s;}
+.planopt label:has(input:checked){border-color:rgba(214,255,102,.5);background:rgba(214,255,102,.06);}
+.planopt input{accent-color:var(--accent);}
+.receipt{border:1px solid var(--line);border-radius:var(--r-lg);padding:32px;background:var(--surface);}
+.receipt-head{display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap;border-bottom:1px dashed var(--line);padding-bottom:22px;margin-bottom:22px;}
+@media print{.nav,.footer,.steps,.no-print{display:none!important}body{background:#fff;color:#000}.receipt{border-color:#ccc}}
+</style>
+</head>
+<body>
+<script src="assets/data.js"></script>
+<script src="assets/ui.js"></script>
+<script>boot('ค้นหาห้อง')</script>
+
+<main class="page"><div class="wrap" id="root"></div></main>
+
+<script>
+const u = Store.unit(qs.get('unit'));
+if(!u || ['Sold','Blocked','Reserved','Contracted'].includes(u.status)){
+  document.getElementById('root').innerHTML =
+    `<div style="text-align:center;padding:80px 0"><h2>ห้องนี้ไม่พร้อมให้จอง</h2><p style="margin:14px 0 24px">อาจถูกจองไปแล้วหรือไม่มีในระบบ</p><a class="btn btn-primary" href="units.html">เลือกห้องอื่น</a></div>`;
+  renderFooter();
+} else {
+  const p = Store.project(u.projectId);
+  let PLAN_KEY = 'B';
+  const PLANS = {
+    A:{name:'ผ่อนสบาย',down:.15,inst:12,bookingFee:p.paymentTerm.bookingFee,contractPct:.05,cashDisc:0,perk:'ฟรีค่าส่วนกลาง 1 ปี'},
+    B:{name:'ยอดนิยม',down:.10,inst:6,bookingFee:Math.round(p.paymentTerm.bookingFee*.6/1000)*1000,contractPct:.05,cashDisc:0,perk:'ฟรีค่าส่วนกลาง 2 ปี + เฟอร์นิเจอร์'},
+    C:{name:'เงินสด',down:0,inst:0,bookingFee:p.paymentTerm.bookingFee,contractPct:0,cashDisc:.07,perk:'ส่วนลดเงินสด 7% + ฟรีค่าโอน'}
+  };
+  let STEP = 1;
+  let CUSTOMER = null, BOOKING = null;
+
+  function planCalc(){
+    const P = PLANS[PLAN_KEY];
+    const net = Math.round(u.priceNet * (1 - P.cashDisc));
+    const booking = P.bookingFee;
+    const contract = Math.round(net * P.contractPct);
+    const downTotal = Math.round(net * P.down);
+    const per = P.inst ? Math.round(downTotal/P.inst/100)*100 : 0;
+    const installments = [];
+    const start = new Date(); start.setMonth(start.getMonth()+1); start.setDate(5);
+    for(let i=1;i<=P.inst;i++){
+      const d=new Date(start); d.setMonth(d.getMonth()+i-1);
+      installments.push({no:i,dueDate:d.toISOString().slice(0,10),
+        amount: i===P.inst ? downTotal-per*(P.inst-1) : per, status:'Pending', paidAt:null});
+    }
+    const transferAmount = net - booking - contract - downTotal;
+    const loan = P.cashDisc ? 0 : Math.round(transferAmount);
+    const costs = buildTransferCosts({...u, priceNet:net}, p, loan);
+    const bank = p.banks[0];
+    const monthly = loan>0 ? monthlyPayment(loan, bank.rate, 30) : 0;
+    return {P,net,booking,contract,downTotal,installments,transferAmount,loan,costs,bank,monthly,
+            discount:u.discount + (u.priceNet-net)};
+  }
+
+  /* ---------------- shell ---------------- */
+  function shell(){
+    const c = planCalc();
+    document.getElementById('root').innerHTML = `
+    <div class="steps no-print">
+      ${['เลือกแผนชำระ','ข้อมูลผู้ซื้อ','ตรวจสอบยอดรวม','ชำระเงินจอง','เสร็จสิ้น']
+        .map((s,i)=>`<div class="step ${STEP===i+1?'on':STEP>i+1?'done':''}"><span class="b">${STEP>i+1?'✓':i+1}</span>${s}</div>`).join('')}
+    </div>
+    <div class="checkout">
+      <div id="panes"></div>
+      <aside class="summary no-print" id="summary"></aside>
+    </div>`;
+    renderSummary(c); renderPane(c);
+  }
+
+  /* ---------------- summary sidebar ---------------- */
+  function renderSummary(c){
+    document.getElementById('summary').innerHTML = `
+      <div class="card">
+        <div class="row" style="gap:14px;align-items:flex-start">
+          <div class="ph no-scrim" style="width:82px;height:66px;border-radius:10px;flex:0 0 82px;overflow:hidden">
+            ${imgTag(imgKey.unit(u), `ห้อง ${u.unitNo}`)}
+            <span class="ph-label" style="font-size:9px">${u.layoutCode}</span>
+          </div>
+          <div style="min-width:0">
+            <div class="tiny muted">${p.nameTh}</div>
+            <div style="font-weight:700;margin-top:3px">ห้อง ${u.unitNo}</div>
+            <div class="tiny muted">${u.roomType} · ${u.usableAreaSqm} ตร.ม. · ชั้น ${u.floor}</div>
+          </div>
+        </div>
+        <hr class="divider" style="margin:18px 0">
+        <div class="kv"><span class="k">ราคาป้าย</span><span class="v">${fmt.baht(u.priceList)}</span></div>
+        <div class="kv"><span class="k">ส่วนลดรวม</span><span class="v accent">${c.discount?'− '+fmt.baht(c.discount):'—'}</span></div>
+        <div class="kv"><span class="k">ราคาสุทธิ</span><span class="v">${fmt.baht(c.net)}</span></div>
+        <hr class="divider" style="margin:14px 0">
+        <div class="kv"><span class="k">เงินทำสัญญา (7 วัน)</span><span class="v">${fmt.baht(c.contract)}</span></div>
+        <div class="kv"><span class="k">ดาวน์ ${(c.P.down*100).toFixed(0)}%${c.P.inst?` · ${c.P.inst} งวด`:''}</span><span class="v">${fmt.baht(c.downTotal)}</span></div>
+        <div class="kv"><span class="k">ยอดวันโอน</span><span class="v">${fmt.baht(c.transferAmount)}</span></div>
+        <div class="kv total"><span class="k">ชำระวันนี้ (เงินจอง)</span><span class="v">${fmt.baht(c.booking)}</span></div>
+        <div class="badge badge-accent" style="width:100%;justify-content:center;margin-top:16px">🎁 ${c.P.perk}</div>
+        <p class="tiny center" style="margin-top:14px;color:var(--muted-2)">ห้องถูกล็อกให้ 7 วันหลังชำระ</p>
+      </div>`;
+  }
+
+  /* ---------------- panes ---------------- */
+  function renderPane(c){
+    const box = document.getElementById('panes');
+    if(STEP===1) box.innerHTML = pane1(c);
+    if(STEP===2) box.innerHTML = pane2(c);
+    if(STEP===3) box.innerHTML = pane3(c);
+    if(STEP===4) box.innerHTML = pane4(c);
+    if(STEP===5) box.innerHTML = pane5(c);
+    initReveal();
+  }
+
+  /* ---- 1. plan ---- */
+  const pane1 = c => `
+    <h1 style="font-size:30px">เลือกแผนการชำระเงิน</h1>
+    <p class="lead" style="margin-top:12px">ราคาห้องเท่ากันทุกแผน ต่างกันที่จังหวะการจ่ายและสิทธิพิเศษที่ได้รับ</p>
+    <div class="planopt" style="margin-top:28px">
+      ${Object.entries(PLANS).map(([k,P])=>{
+        const net=Math.round(u.priceNet*(1-P.cashDisc));
+        return `<label>
+          <div class="row-between"><span style="font-weight:700">แผน ${k} · ${P.name}</span><input type="radio" name="plan" value="${k}" ${k===PLAN_KEY?'checked':''} onchange="setPlan('${k}')"></div>
+          <div style="font-size:30px;font-weight:700;letter-spacing:-.03em;margin:12px 0 4px">${P.cashDisc?('−'+(P.cashDisc*100).toFixed(0)+'%'):((P.down*100).toFixed(0)+'%')}</div>
+          <div class="tiny muted">${P.cashDisc?'ส่วนลดเงินสด':'เงินดาวน์'}</div>
+          <hr class="divider" style="margin:16px 0">
+          <div class="kv" style="padding:7px 0"><span class="k tiny">เงินจอง</span><span class="v tiny">${fmt.baht(P.bookingFee)}</span></div>
+          <div class="kv" style="padding:7px 0"><span class="k tiny">ทำสัญญา</span><span class="v tiny">${P.contractPct?fmt.baht(Math.round(net*P.contractPct)):'—'}</span></div>
+          <div class="kv" style="padding:7px 0"><span class="k tiny">ผ่อนดาวน์</span><span class="v tiny">${P.inst?P.inst+' งวด':'ไม่มี'}</span></div>
+          <div class="kv" style="padding:7px 0"><span class="k tiny">ราคาสุทธิ</span><span class="v tiny accent">${fmt.baht(net)}</span></div>
+          <div class="badge" style="margin-top:12px;width:100%;justify-content:center">🎁 ${P.perk}</div>
+        </label>`;}).join('')}
+    </div>
+
+    <div class="card" style="margin-top:26px">
+      <h4>ตารางผ่อนดาวน์ตามแผนที่เลือก</h4>
+      ${c.installments.length ? `<div class="tablewrap" style="margin-top:16px;border:0"><table>
+        <thead><tr><th>งวด</th><th>ครบกำหนด</th><th class="num">จำนวนเงิน</th></tr></thead>
+        <tbody>${c.installments.map(i=>`<tr><td>${i.no}</td><td>${fmt.date(i.dueDate)}</td><td class="num">${fmt.baht(i.amount)}</td></tr>`).join('')}</tbody></table></div>`
+      : `<p style="margin-top:12px">แผนเงินสดไม่มีการผ่อนดาวน์ — ชำระส่วนที่เหลือ ${fmt.baht(c.transferAmount)} ภายใน 30 วันหลังทำสัญญา</p>`}
+    </div>
+
+    <div class="row" style="gap:12px;margin-top:26px">
+      <a class="btn btn-ghost" href="unit.html?id=${encodeURIComponent(u.id)}">← กลับไปดูห้อง</a>
+      <button class="btn btn-primary" onclick="go(2)">ถัดไป: กรอกข้อมูลผู้ซื้อ</button>
+    </div>`;
+
+  /* ---- 2. customer ---- */
+  const pane2 = c => `
+    <h1 style="font-size:30px">ข้อมูลผู้ซื้อ</h1>
+    <p class="lead" style="margin-top:12px">ข้อมูลนี้จะใช้ออกใบจองและสัญญาจะซื้อจะขาย กรุณากรอกตามบัตรประชาชน/หนังสือเดินทาง</p>
+    <form id="cusForm" style="display:grid;gap:20px;margin-top:28px" onsubmit="submitCustomer(event)">
+      <div class="card">
+        <h4>ข้อมูลส่วนตัว</h4>
+        <div class="grid g2" style="gap:16px;margin-top:18px">
+          <div class="field"><label>คำนำหน้า</label><select class="select" name="prefix"><option>นาย</option><option>นาง</option><option>นางสาว</option><option>Mr.</option><option>Mrs.</option><option>Ms.</option></select></div>
+          <div class="field"><label>สัญชาติ <span class="req">*</span></label><select class="select" name="nationality" required onchange="toggleForeign(this.value)"><option>ไทย</option><option>ญี่ปุ่น</option><option>จีน</option><option>สิงคโปร์</option><option>อื่น ๆ</option></select></div>
+          <div class="field"><label>ชื่อ <span class="req">*</span></label><input class="input" name="firstName" required></div>
+          <div class="field"><label>นามสกุล <span class="req">*</span></label><input class="input" name="lastName" required></div>
+          <div class="field"><label>เลขบัตรประชาชน / Passport <span class="req">*</span></label><input class="input" name="idCard" required placeholder="x-xxxx-xxxxx-xx-x"></div>
+          <div class="field"><label>วันเกิด <span class="req">*</span></label><input class="input" type="date" name="dob" required></div>
+        </div>
+        <div id="foreignNote" style="display:none;margin-top:16px">
+          <div class="badge badge-info" style="width:100%;justify-content:flex-start;padding:13px;line-height:1.5;white-space:normal;text-align:left">
+            ผู้ซื้อชาวต่างชาติ: โควตาต่างชาติของโครงการนี้เหลือ ${(p.foreignQuotaPct-p.foreignQuotaSoldPct).toFixed(0)}% — ต้องแสดงหลักฐานการโอนเงินจากต่างประเทศ (FET/Credit Advice) ก่อนวันโอนกรรมสิทธิ์
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h4>ช่องทางติดต่อ</h4>
+        <div class="grid g2" style="gap:16px;margin-top:18px">
+          <div class="field"><label>เบอร์โทรศัพท์ <span class="req">*</span></label><input class="input" name="phone" required placeholder="08x-xxx-xxxx"></div>
+          <div class="field"><label>อีเมล <span class="req">*</span></label><input class="input" type="email" name="email" required></div>
+          <div class="field"><label>LINE ID</label><input class="input" name="lineId"></div>
+          <div class="field"><label>อาชีพ</label><input class="input" name="occupation" placeholder="เช่น พนักงานบริษัท"></div>
+        </div>
+        <div class="field" style="margin-top:16px"><label>ที่อยู่ตามทะเบียนบ้าน <span class="req">*</span></label><textarea class="textarea" name="address" required></textarea></div>
+      </div>
+
+      <div class="card">
+        <h4>ข้อมูลเพื่อประเมินสินเชื่อ <span class="tiny muted">(ไม่บังคับ แต่ช่วยให้ทีมสินเชื่อเตรียมงานได้เร็วขึ้น)</span></h4>
+        <div class="grid g2" style="gap:16px;margin-top:18px">
+          <div class="field"><label>รายได้ต่อเดือน (บาท)</label><input class="input" type="number" name="monthlyIncome" placeholder="เช่น 80000"></div>
+          <div class="field"><label>วัตถุประสงค์การซื้อ</label><select class="select" name="purpose"><option>อยู่เอง</option><option>ลงทุนปล่อยเช่า</option><option>ซื้อให้ลูก/ครอบครัว</option><option>เก็งกำไร</option></select></div>
+          <div class="field"><label>ธนาคารที่ต้องการยื่นกู้</label><select class="select" name="bank">${p.banks.map(b=>`<option>${b.name}</option>`).join('')}<option>ยังไม่ตัดสินใจ</option></select></div>
+          <div class="field"><label>รู้จักโครงการจากช่องทางใด</label><select class="select" name="source"><option>Google</option><option>Facebook / Instagram</option><option>ป้ายโฆษณา</option><option>เพื่อนแนะนำ</option><option>เอเจนต์</option><option>อื่น ๆ</option></select></div>
+        </div>
+      </div>
+
+      <div class="card card-flat">
+        <label class="check"><input type="checkbox" name="pdpa" required><span><b style="color:#fff">ยินยอมตาม PDPA</b> — ข้าพเจ้ายินยอมให้บริษัทเก็บ รวบรวม ใช้ และเปิดเผยข้อมูลส่วนบุคคล เพื่อการพิจารณาจอง ทำสัญญา ยื่นสินเชื่อ และการโอนกรรมสิทธิ์ <a class="accent" href="#">อ่านนโยบายฉบับเต็ม</a></span></label>
+        <label class="check" style="margin-top:14px"><input type="checkbox" name="terms" required><span>ข้าพเจ้าได้อ่านและยอมรับ <a class="accent" href="#">เงื่อนไขการจอง</a> โดยเข้าใจว่าเงินจองจะไม่ได้รับคืนหากยกเลิกโดยผู้ซื้อเอง และต้องทำสัญญาภายใน 7 วัน</span></label>
+        <label class="check" style="margin-top:14px"><input type="checkbox" name="marketing"><span>ยินดีรับข่าวสารโปรโมชั่นและโครงการใหม่ (ยกเลิกได้ทุกเมื่อ)</span></label>
+      </div>
+
+      <div class="row" style="gap:12px">
+        <button type="button" class="btn btn-ghost" onclick="go(1)">← ย้อนกลับ</button>
+        <button type="submit" class="btn btn-primary">ถัดไป: ตรวจสอบยอดรวม</button>
+      </div>
+    </form>`;
+
+  /* ---- 3. review ---- */
+  const pane3 = c => `
+    <h1 style="font-size:30px">ตรวจสอบรายละเอียดทั้งหมด</h1>
+    <p class="lead" style="margin-top:12px">นี่คือทุกบาทที่คุณจะต้องจ่ายตลอดการซื้อห้องนี้ ตั้งแต่วันนี้จนถึงวันรับกุญแจ</p>
+
+    <div class="card" style="margin-top:26px">
+      <div class="row-between"><h4 style="margin:0">ห้องที่เลือก</h4><a class="tiny accent" href="unit.html?id=${encodeURIComponent(u.id)}">ดูรายละเอียดห้อง →</a></div>
+      <div class="grid g2" style="gap:0 24px;margin-top:16px">
+        <div class="kv"><span class="k">โครงการ</span><span class="v">${p.nameTh}</span></div>
+        <div class="kv"><span class="k">เลขที่ห้อง</span><span class="v">${u.unitNo} (อาคาร ${u.building})</span></div>
+        <div class="kv"><span class="k">แบบห้อง</span><span class="v">${u.roomType} · ${u.layoutCode}</span></div>
+        <div class="kv"><span class="k">ชั้น</span><span class="v">${u.floor}</span></div>
+        <div class="kv"><span class="k">พื้นที่ใช้สอย</span><span class="v">${u.usableAreaSqm} ตร.ม. (+ระเบียง ${u.balconyAreaSqm})</span></div>
+        <div class="kv"><span class="k">ทิศ / วิว</span><span class="v">${u.direction} · ${u.view}</span></div>
+        <div class="kv"><span class="k">เฟอร์นิเจอร์</span><span class="v">${u.furnishing}</span></div>
+        <div class="kv"><span class="k">ที่จอดรถ</span><span class="v">${u.parkingSlots} คัน</span></div>
+        <div class="kv"><span class="k">กำหนดโอน</span><span class="v">${p.quarterCompleted}</span></div>
+        <div class="kv"><span class="k">กรรมสิทธิ์</span><span class="v">${p.ownership}</span></div>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:20px">
+      <h4>ผู้ซื้อ</h4>
+      <div class="grid g2" style="gap:0 24px;margin-top:16px">
+        <div class="kv"><span class="k">ชื่อ-นามสกุล</span><span class="v">${CUSTOMER.prefix} ${CUSTOMER.firstName} ${CUSTOMER.lastName}</span></div>
+        <div class="kv"><span class="k">สัญชาติ</span><span class="v">${CUSTOMER.nationality}</span></div>
+        <div class="kv"><span class="k">เลขบัตร/พาสปอร์ต</span><span class="v">${CUSTOMER.idCard}</span></div>
+        <div class="kv"><span class="k">โทรศัพท์</span><span class="v">${CUSTOMER.phone}</span></div>
+        <div class="kv"><span class="k">อีเมล</span><span class="v">${CUSTOMER.email}</span></div>
+        <div class="kv"><span class="k">ธนาคารที่จะยื่นกู้</span><span class="v">${CUSTOMER.bank||'-'}</span></div>
+      </div>
+      <button class="btn btn-ghost btn-sm" style="margin-top:16px" onclick="go(2)">แก้ไขข้อมูล</button>
+    </div>
+
+    <div class="card" style="margin-top:20px">
+      <h4>A · ราคาห้องและแผนการชำระ <span class="badge" style="margin-left:8px">แผน ${PLAN_KEY} · ${c.P.name}</span></h4>
+      <div style="margin-top:16px">
+        <div class="kv"><span class="k">ราคาป้าย</span><span class="v">${fmt.baht(u.priceList)}</span></div>
+        <div class="kv"><span class="k">ส่วนลด/โปรโมชั่น</span><span class="v accent">${c.discount?'− '+fmt.baht(c.discount):'—'}</span></div>
+        <div class="kv"><span class="k">ราคาสุทธิ (${fmt.baht(Math.round(c.net/u.usableAreaSqm))}/ตร.ม.)</span><span class="v">${fmt.baht(c.net)}</span></div>
+        <hr class="divider" style="margin:12px 0">
+        <div class="kv"><span class="k">1) เงินจอง — ชำระวันนี้</span><span class="v accent">${fmt.baht(c.booking)}</span></div>
+        <div class="kv"><span class="k">2) เงินทำสัญญา — ภายใน 7 วัน</span><span class="v">${fmt.baht(c.contract)}</span></div>
+        <div class="kv"><span class="k">3) เงินดาวน์ ${(c.P.down*100).toFixed(0)}%${c.P.inst?` (${c.P.inst} งวด × ~${fmt.baht(c.installments[0].amount)})`:''}</span><span class="v">${fmt.baht(c.downTotal)}</span></div>
+        <div class="kv"><span class="k">4) ยอดคงเหลือวันโอน (ยื่นสินเชื่อ)</span><span class="v">${fmt.baht(c.transferAmount)}</span></div>
+        <div class="kv total"><span class="k">รวมราคาห้อง</span><span class="v">${fmt.baht(c.net)}</span></div>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:20px">
+      <h4>B · ค่าใช้จ่ายเพิ่มเติม ณ วันโอนกรรมสิทธิ์ <span class="tiny muted">(ไม่รวมในราคาห้อง)</span></h4>
+      ${c.costs.useMeasure?`<div class="badge badge-ok" style="margin-top:12px">✓ ราคาไม่เกิน 7 ล้าน เข้าเกณฑ์มาตรการรัฐ ค่าโอน–จดจำนอง 0.01%</div>`:''}
+      <div style="margin-top:16px">
+        ${c.costs.items.map(i=>`<div class="kv"><span class="k">${i.k}</span><span class="v">${fmt.baht(i.v)}</span></div>`).join('')}
+        <div class="kv total"><span class="k">รวมค่าใช้จ่ายวันโอน</span><span class="v">${fmt.baht(c.costs.total)}</span></div>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:20px">
+      <h4>C · ภาระรายเดือนหลังเข้าอยู่</h4>
+      <div style="margin-top:16px">
+        <div class="kv"><span class="k">ผ่อนธนาคาร (${c.bank.name} ${c.bank.rate}% · 30 ปี)</span><span class="v">${c.monthly?fmt.baht(Math.round(c.monthly)):'— (ซื้อเงินสด)'}</span></div>
+        <div class="kv"><span class="k">ค่าส่วนกลาง</span><span class="v">${fmt.baht(u.commonFeeMonthly)}</span></div>
+        <div class="kv"><span class="k">ค่าน้ำ-ไฟโดยประมาณ</span><span class="v">${fmt.baht(1200+Math.round(u.usableAreaSqm*22))}</span></div>
+        <div class="kv total"><span class="k">รวมต่อเดือน</span><span class="v">${fmt.baht(Math.round(c.monthly)+u.commonFeeMonthly+1200+Math.round(u.usableAreaSqm*22))}</span></div>
+      </div>
+      ${c.monthly?`<p class="tiny" style="margin-top:14px;color:var(--muted-2)">รายได้ขั้นต่ำที่ธนาคารมักกำหนด: ${fmt.baht(requiredIncome(c.monthly))} ต่อเดือน${CUSTOMER.monthlyIncome?` — รายได้ที่คุณแจ้ง ${fmt.baht(+CUSTOMER.monthlyIncome)} <b class="${+CUSTOMER.monthlyIncome>=requiredIncome(c.monthly)?'accent':''}">${+CUSTOMER.monthlyIncome>=requiredIncome(c.monthly)?'✓ ผ่านเกณฑ์เบื้องต้น':'⚠ อาจต้องเพิ่มผู้กู้ร่วม'}</b>`:''}</p>`:''}
+    </div>
+
+    <div class="card card-flat" style="margin-top:20px">
+      <h4>ของแถม / สิทธิพิเศษที่ได้รับ</h4>
+      <div style="margin-top:14px;display:flex;gap:8px;flex-wrap:wrap">
+        <span class="badge badge-accent">🎁 ${c.P.perk}</span>
+        ${p.promotions.filter(x=>x.type==='freebie').map(x=>`<span class="badge badge-accent">🎁 ${x.name}</span>`).join('')}
+      </div>
+    </div>
+
+    <div class="row" style="gap:12px;margin-top:26px">
+      <button class="btn btn-ghost" onclick="go(2)">← ย้อนกลับ</button>
+      <button class="btn btn-primary btn-lg" onclick="go(4)">ยืนยันและไปชำระเงินจอง ${fmt.baht(c.booking)}</button>
+    </div>`;
+
+  /* ---- 4. payment ---- */
+  const pane4 = c => `
+    <h1 style="font-size:30px">ชำระเงินจอง</h1>
+    <p class="lead" style="margin-top:12px">ยอดที่ต้องชำระวันนี้ <b class="accent">${fmt.baht(c.booking)}</b> — เมื่อชำระแล้วห้อง ${u.unitNo} จะถูกล็อกให้คุณ 7 วัน</p>
+
+    <form onsubmit="submitPayment(event)" style="display:grid;gap:20px;margin-top:28px">
+      <div class="card">
+        <h4>เลือกช่องทางชำระเงิน</h4>
+        <div class="payopt" style="margin-top:18px">
+          <label><input type="radio" name="method" value="QR PromptPay" checked onchange="switchMethod(this.value)">
+            <div class="pinfo"><div style="font-weight:600">QR PromptPay</div><div class="tiny muted">สแกนจ่ายผ่านแอปธนาคาร ยืนยันอัตโนมัติภายใน 1 นาที · ไม่มีค่าธรรมเนียม</div></div></label>
+          <label><input type="radio" name="method" value="บัตรเครดิต" onchange="switchMethod(this.value)">
+            <div class="pinfo"><div style="font-weight:600">บัตรเครดิต / เดบิต</div><div class="tiny muted">ผ่อน 0% นานสูงสุด 10 เดือน (เฉพาะบัตรที่ร่วมรายการ) · มีค่าธรรมเนียม 1.5%</div></div></label>
+          <label><input type="radio" name="method" value="โอนผ่านธนาคาร" onchange="switchMethod(this.value)">
+            <div class="pinfo"><div style="font-weight:600">โอนเงินผ่านธนาคาร + แนบสลิป</div><div class="tiny muted">เจ้าหน้าที่ตรวจสอบภายใน 2 ชั่วโมงทำการ</div></div></label>
+        </div>
+      </div>
+
+      <div class="card" id="methodBox"></div>
+
+      <div class="card card-flat">
+        <div class="kv"><span class="k">ยอดเงินจอง</span><span class="v">${fmt.baht(c.booking)}</span></div>
+        <div class="kv" id="feeRow"><span class="k">ค่าธรรมเนียมช่องทาง</span><span class="v">฿0</span></div>
+        <div class="kv total"><span class="k">ยอดชำระวันนี้</span><span class="v" id="payTotal">${fmt.baht(c.booking)}</span></div>
+      </div>
+
+      <label class="check"><input type="checkbox" required><span>ข้าพเจ้ายืนยันว่าข้อมูลถูกต้อง และรับทราบว่าเงินจองจำนวน ${fmt.baht(c.booking)} จะถูกนำไปหักจากราคาห้อง แต่จะไม่ได้รับคืนหากข้าพเจ้ายกเลิกการจองเอง</span></label>
+
+      <div class="row" style="gap:12px">
+        <button type="button" class="btn btn-ghost" onclick="go(3)">← ย้อนกลับ</button>
+        <button type="submit" class="btn btn-primary btn-lg" id="payBtn">ชำระเงิน ${fmt.baht(c.booking)}</button>
+      </div>
+    </form>`;
+
+  /* ---- 5. done ---- */
+  const pane5 = c => {
+    const b = BOOKING;
+    return `
+    <div class="center" style="margin-bottom:34px">
+      <div style="width:74px;height:74px;border-radius:50%;background:var(--accent);color:#0A0A0A;display:grid;place-items:center;font-size:36px;margin:0 auto 22px">✓</div>
+      <h1 style="font-size:32px">จองสำเร็จแล้ว!</h1>
+      <p class="lead" style="margin:14px auto 0;text-align:center">เราส่งใบจองไปที่ <b class="accent">${CUSTOMER.email}</b> แล้ว เจ้าหน้าที่จะติดต่อกลับภายใน 24 ชั่วโมงเพื่อนัดเซ็นสัญญา</p>
+    </div>
+
+    <div class="receipt">
+      <div class="receipt-head">
+        <div>
+          <div class="brand" style="font-size:19px"><span class="brand-mark">N</span><span>NIRA<span class="accent">.</span></span></div>
+          <div class="tiny muted" style="margin-top:10px">บริษัท นิรา ดีเวลลอปเมนท์ จำกัด (มหาชน)<br>เลขประจำตัวผู้เสียภาษี 0107556000001</div>
+        </div>
+        <div style="text-align:right">
+          <div style="font-size:13px;color:var(--muted-2);letter-spacing:.1em">ใบจองห้องชุด</div>
+          <div style="font-size:22px;font-weight:700;margin-top:4px">${b.bookingNo}</div>
+          <div class="tiny muted" style="margin-top:6px">ออกวันที่ ${fmt.date(b.bookingDate)}</div>
+          <div style="margin-top:10px">${badge('Reserved')}</div>
+        </div>
+      </div>
+
+      <div class="grid g2" style="gap:0 30px">
+        <div>
+          <div class="tiny muted" style="margin-bottom:8px">ผู้จอง</div>
+          <div class="kv"><span class="k">ชื่อ</span><span class="v">${CUSTOMER.prefix} ${CUSTOMER.firstName} ${CUSTOMER.lastName}</span></div>
+          <div class="kv"><span class="k">เลขบัตร/พาสปอร์ต</span><span class="v">${CUSTOMER.idCard}</span></div>
+          <div class="kv"><span class="k">โทรศัพท์</span><span class="v">${CUSTOMER.phone}</span></div>
+          <div class="kv"><span class="k">อีเมล</span><span class="v">${CUSTOMER.email}</span></div>
+        </div>
+        <div>
+          <div class="tiny muted" style="margin-bottom:8px">ห้องที่จอง</div>
+          <div class="kv"><span class="k">โครงการ</span><span class="v">${p.nameTh}</span></div>
+          <div class="kv"><span class="k">เลขที่ห้อง</span><span class="v">${u.unitNo} · ชั้น ${u.floor}</span></div>
+          <div class="kv"><span class="k">แบบห้อง</span><span class="v">${u.roomType} ${u.usableAreaSqm} ตร.ม.</span></div>
+          <div class="kv"><span class="k">ราคาสุทธิ</span><span class="v">${fmt.baht(c.net)}</span></div>
+        </div>
+      </div>
+
+      <hr class="divider" style="margin:24px 0">
+      <div class="kv"><span class="k">เงินจองที่ชำระแล้ว (${b.payMethod})</span><span class="v accent">${fmt.baht(c.booking)}</span></div>
+      <div class="kv"><span class="k">เงินทำสัญญาที่ต้องชำระ</span><span class="v">${fmt.baht(c.contract)}</span></div>
+      <div class="kv"><span class="k">กำหนดเซ็นสัญญาภายใน</span><span class="v" style="color:var(--warn)">${fmt.date(b.expireDate)}</span></div>
+      <div class="kv"><span class="k">ที่ปรึกษาการขาย</span><span class="v">${u.salesOwner} · 02-123-4567</span></div>
+      <div class="kv total"><span class="k">ยอดคงเหลือทั้งหมด</span><span class="v">${fmt.baht(c.net - c.booking)}</span></div>
+
+      <div style="margin-top:26px;padding:18px;border:1px dashed var(--line);border-radius:var(--r-md)">
+        <div style="font-weight:600;margin-bottom:10px">สิ่งที่ต้องทำต่อไป</div>
+        <ol style="margin:0;padding-left:20px;color:var(--muted);font-size:14px;display:grid;gap:8px">
+          <li>เตรียมเอกสาร: สำเนาบัตรประชาชน, สำเนาทะเบียนบ้าน, สลิปเงินเดือน 3 เดือน, Statement 6 เดือน</li>
+          <li>เซ็นสัญญาจะซื้อจะขายและชำระเงินทำสัญญา ${fmt.baht(c.contract)} ภายในวันที่ ${fmt.date(b.expireDate)}</li>
+          <li>ชำระค่างวดดาวน์ตามตารางที่ตกลง (ดูได้ในหน้าบัญชีของฉัน)</li>
+          <li>ยื่นสินเชื่อก่อนกำหนดโอน 60 วัน — ทีมสินเชื่อจะติดต่อคุณเอง</li>
+        </ol>
+      </div>
+    </div>
+
+    <div class="row no-print" style="gap:12px;margin-top:26px;flex-wrap:wrap">
+      <button class="btn btn-primary" onclick="window.print()">🖨 พิมพ์ / บันทึกใบจอง PDF</button>
+      <a class="btn btn-ghost" href="account.html">ไปหน้าบัญชีของฉัน</a>
+      <a class="btn btn-ghost" href="units.html">ดูห้องอื่น</a>
+    </div>`;
+  };
+
+  /* ---------------- actions ---------------- */
+  window.setPlan = k => { PLAN_KEY = k; const c=planCalc(); renderSummary(c); renderPane(c); };
+  window.go = s => { STEP = s; window.scrollTo({top:0,behavior:'smooth'}); shell(); };
+  window.toggleForeign = v => { document.getElementById('foreignNote').style.display = v==='ไทย' ? 'none':'block'; };
+
+  window.submitCustomer = e => {
+    e.preventDefault();
+    const f = new FormData(e.target);
+    CUSTOMER = Object.fromEntries(f.entries());
+    CUSTOMER.pdpaConsent = true;
+    go(3);
+  };
+
+  window.switchMethod = m => {
+    const c = planCalc();
+    const box = document.getElementById('methodBox');
+    let fee = 0;
+    if(m==='QR PromptPay'){
+      box.innerHTML = `<h4>สแกนเพื่อชำระเงิน</h4>
+        <div class="center" style="margin-top:20px">
+          ${qrSvg()}
+          <div style="margin-top:16px;font-size:22px;font-weight:700">${fmt.baht(c.booking)}</div>
+          <div class="tiny muted">บจก. นิรา ดีเวลลอปเมนท์ · อ้างอิง ${u.unitNo}</div>
+          <div class="badge badge-warn" style="margin-top:16px">⏱ QR หมดอายุใน 14:59 นาที</div>
+        </div>`;
+    } else if(m==='บัตรเครดิต'){
+      fee = Math.round(c.booking*0.015);
+      box.innerHTML = `<h4>ข้อมูลบัตร</h4>
+        <div class="badge badge-info" style="margin-top:14px;white-space:normal;text-align:left;line-height:1.5;padding:12px">
+          ตัวอย่างระบบสาธิต — หน้าจริงจะ redirect ไปยังหน้าชำระเงินที่ปลอดภัยของผู้ให้บริการ (2C2P / Omise) เว็บไซต์นี้ไม่เก็บเลขบัตรของคุณ
+        </div>
+        <div class="grid g2" style="gap:16px;margin-top:18px">
+          <div class="field" style="grid-column:span 2"><label>แผนการผ่อน</label>
+            <select class="select"><option>ชำระเต็มจำนวน</option><option>ผ่อน 0% 3 เดือน</option><option>ผ่อน 0% 6 เดือน</option><option>ผ่อน 0% 10 เดือน</option></select></div>
+        </div>`;
+    } else {
+      box.innerHTML = `<h4>โอนเข้าบัญชีบริษัท</h4>
+        <div style="margin-top:16px">
+          <div class="kv"><span class="k">ธนาคาร</span><span class="v">กสิกรไทย สาขาเอ็มควอเทียร์</span></div>
+          <div class="kv"><span class="k">ชื่อบัญชี</span><span class="v">บจก. นิรา ดีเวลลอปเมนท์</span></div>
+          <div class="kv"><span class="k">เลขที่บัญชี</span><span class="v">039-8-88888-8</span></div>
+          <div class="kv"><span class="k">จำนวนเงิน</span><span class="v accent">${fmt.baht(c.booking)}</span></div>
+        </div>
+        <div class="dropzone" style="margin-top:20px" onclick="toast('ระบบสาธิต — แนบสลิปได้ในเวอร์ชันจริง')">
+          <div style="font-size:30px">📎</div>
+          <div style="font-weight:600;margin-top:8px">แนบสลิปโอนเงิน</div>
+          <div class="tiny muted">JPG, PNG หรือ PDF ไม่เกิน 5 MB</div>
+        </div>`;
+    }
+    document.getElementById('feeRow').querySelector('.v').textContent = fmt.baht(fee);
+    document.getElementById('payTotal').textContent = fmt.baht(c.booking + fee);
+    document.getElementById('payBtn').textContent = 'ชำระเงิน ' + fmt.baht(c.booking + fee);
+  };
+
+  window.submitPayment = e => {
+    e.preventDefault();
+    const btn = document.getElementById('payBtn');
+    btn.textContent = 'กำลังดำเนินการ...'; btn.classList.add('is-disabled');
+    const method = new FormData(e.target).get('method');
+    setTimeout(()=>{
+      const c = planCalc();
+      const cusId = Store.addCustomer(CUSTOMER);
+      const today = new Date(); const exp = new Date(); exp.setDate(exp.getDate()+7);
+      BOOKING = Store.addBooking({
+        customerId: cusId, unitId: u.id, projectId: p.id,
+        planKey: PLAN_KEY, planName: c.P.name,
+        priceNet: c.net,
+        bookingFee: c.booking, bookingDate: today.toISOString().slice(0,10), expireDate: exp.toISOString().slice(0,10),
+        contractFee: c.contract, contractDate: null,
+        downTotal: c.downTotal, installments: c.installments,
+        transferAmount: c.transferAmount,
+        transferCosts: c.costs.total,
+        promotions: [c.P.perk, ...p.promotions.filter(x=>x.type==='freebie').map(x=>x.name)],
+        loan: { bank: CUSTOMER.bank||'-', amount: c.loan, years:30, rate:c.bank.rate, status:'Not submitted' },
+        status: 'Reserved', salesOwner: u.salesOwner, payMethod: method,
+        documents: [
+          {name:'สำเนาบัตรประชาชน',status:'Waiting'},{name:'สำเนาทะเบียนบ้าน',status:'Waiting'},
+          {name:'สลิปเงินเดือน 3 เดือน',status:'Waiting'},{name:'Statement 6 เดือน',status:'Waiting'}
+        ]
+      });
+      Store.addPayment({ bookingId: BOOKING.id, type:'เงินจอง', amount:c.booking, method,
+        paidAt: today.toISOString().slice(0,10), status: method==='QR PromptPay'?'Verified':'Waiting verify',
+        receiptNo: method==='QR PromptPay' ? 'RC-'+BOOKING.bookingNo.slice(5) : '-' });
+      Store.setSession({ customerId: cusId });
+      go(5);
+      toast('ชำระเงินจองสำเร็จ');
+    }, 1400);
+  };
+
+  /* fake QR */
+  function qrSvg(){
+    const n=25, cells=[];
+    const rnd=mulberry32(u.floor*1000+u.usableAreaSqm);
+    for(let y=0;y<n;y++)for(let x=0;x<n;x++){
+      const finder=(x<7&&y<7)||(x>n-8&&y<7)||(x<7&&y>n-8);
+      const on = finder ? ((x===0||x===6||y===0||y===6||(x>1&&x<5&&y>1&&y<5)) ||
+                 (x>n-8&&((x===n-7||x===n-1||y===0||y===6)||(x>n-6&&x<n-2&&y>1&&y<5))) ||
+                 (y>n-8&&((x===0||x===6||y===n-7||y===n-1)||(x>1&&x<5&&y>n-6&&y<n-2))))
+                 : rnd()>0.52;
+      if(on) cells.push(`<rect x="${x}" y="${y}" width="1" height="1"/>`);
+    }
+    return `<svg class="qr" viewBox="0 0 ${n} ${n}" xmlns="http://www.w3.org/2000/svg"><g fill="#0A0A0A">${cells.join('')}</g></svg>`;
+  }
+
+  shell();
+  setTimeout(()=>{ if(STEP===4) switchMethod('QR PromptPay'); },0);
+  const _go = window.go;
+  window.go = s => { _go(s); if(s===4) switchMethod('QR PromptPay'); };
+  renderFooter();
+}
+</script>
+</body>
+</html>

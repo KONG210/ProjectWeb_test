@@ -1,0 +1,320 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ค้นหาห้องว่าง — NIRA Residence</title>
+<link rel="icon" href="assets/img/favicon.png" type="image/png">
+<link rel="apple-touch-icon" href="assets/img/apple-touch-icon.png">
+<link rel="stylesheet" href="assets/theme.css">
+<style>
+.page-head{padding:calc(var(--nav-h) + 56px) 0 34px;position:relative;overflow:hidden;}
+.layout{display:grid;grid-template-columns:290px 1fr;gap:28px;align-items:start;padding-bottom:96px;}
+.filters{position:sticky;top:calc(var(--nav-h) + 20px);background:var(--surface);border:1px solid var(--line);border-radius:var(--r-lg);padding:24px;display:grid;gap:22px;max-height:calc(100vh - var(--nav-h) - 44px);overflow:auto;}
+.fgroup h5{font-size:13px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--muted-2);margin:0 0 12px;}
+.results-head{display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;margin-bottom:22px;}
+.viewtabs{display:flex;background:var(--surface-2);border:1px solid var(--line);border-radius:var(--r-pill);padding:4px;}
+.viewtabs button{background:none;border:0;padding:7px 16px;border-radius:var(--r-pill);cursor:pointer;font-size:13.5px;color:var(--muted);}
+.viewtabs button.on{background:var(--accent);color:#0A0A0A;font-weight:600;}
+.unitgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;}
+@media(max-width:1180px){.unitgrid{grid-template-columns:repeat(2,1fr);}}
+@media(max-width:980px){.layout{grid-template-columns:1fr;}.filters{position:static;max-height:none;}}
+@media(max-width:640px){.unitgrid{grid-template-columns:1fr;}}
+/* stack plan */
+.stack{display:grid;gap:5px;}
+.stackrow{display:grid;grid-template-columns:56px 1fr;gap:10px;align-items:center;}
+.stackrow .fl{font-size:12px;color:var(--muted-2);text-align:right;font-variant-numeric:tabular-nums;}
+.cells{display:flex;gap:5px;flex-wrap:wrap;}
+.cell{width:32px;height:26px;border-radius:5px;border:1px solid var(--line);display:grid;place-items:center;font-size:9.5px;cursor:pointer;transition:.15s;color:var(--muted-2);}
+.cell:hover{transform:scale(1.18);z-index:2;border-color:var(--accent);}
+.c-Available{background:rgba(214,255,102,.22);border-color:rgba(214,255,102,.5);color:var(--accent);}
+.c-Reserved{background:rgba(251,191,36,.18);border-color:rgba(251,191,36,.4);color:var(--warn);}
+.c-Contracted{background:rgba(96,165,250,.16);border-color:rgba(96,165,250,.35);color:var(--info);}
+.c-Sold{background:rgba(248,113,113,.14);border-color:rgba(248,113,113,.3);color:var(--danger);}
+.c-Blocked{background:rgba(255,255,255,.04);}
+.legend{display:flex;gap:16px;flex-wrap:wrap;font-size:12.5px;color:var(--muted);margin-bottom:18px;}
+.legend i{width:12px;height:12px;border-radius:3px;display:inline-block;margin-right:6px;vertical-align:-1px;}
+.empty{text-align:center;padding:80px 20px;color:var(--muted-2);}
+</style>
+</head>
+<body>
+<script src="assets/data.js"></script>
+<script src="assets/ui.js"></script>
+<script>boot('ค้นหาห้อง')</script>
+
+<header class="page-head">
+  <div class="gridlines"></div>
+  <div class="glow glow-lime glow-lg" style="left:-260px;top:-340px"></div>
+  <div class="wrap rel">
+    <span class="eyebrow">ห้องว่างเรียลไทม์</span>
+    <h1 style="font-size:clamp(32px,4vw,50px)">เลือกห้องที่ใช่สำหรับคุณ</h1>
+    <p class="lead" style="margin-top:16px">กรองตามงบประมาณ ขนาด จำนวนห้องนอน ชั้น ทิศ และวิว — เห็นราคาสุทธิพร้อมค่าส่วนกลางรายเดือนทันที</p>
+  </div>
+</header>
+
+<main class="wrap layout">
+  <!-- ============ FILTERS ============ -->
+  <aside class="filters">
+    <div class="row-between">
+      <h4 style="margin:0">ตัวกรอง</h4>
+      <button class="btn btn-sm btn-ghost" onclick="resetFilters()">ล้าง</button>
+    </div>
+
+    <div class="fgroup">
+      <h5>โครงการ</h5>
+      <select class="select" id="fProject"><option value="">ทุกโครงการ</option></select>
+    </div>
+
+    <div class="fgroup">
+      <h5>งบประมาณ <span class="accent" id="fBudgetLabel"></span></h5>
+      <input type="range" id="fBudget" min="2000000" max="40000000" step="500000" value="40000000">
+    </div>
+
+    <div class="fgroup">
+      <h5>ห้องนอน</h5>
+      <div class="chips" id="fBed"></div>
+    </div>
+
+    <div class="fgroup">
+      <h5>แบบห้อง</h5>
+      <div class="chips" id="fType"></div>
+    </div>
+
+    <div class="fgroup">
+      <h5>พื้นที่ใช้สอย (ตร.ม.)</h5>
+      <div class="row" style="gap:10px">
+        <input class="input" type="number" id="fAreaMin" placeholder="ต่ำสุด">
+        <input class="input" type="number" id="fAreaMax" placeholder="สูงสุด">
+      </div>
+    </div>
+
+    <div class="fgroup">
+      <h5>ชั้น</h5>
+      <div class="row" style="gap:10px">
+        <input class="input" type="number" id="fFloorMin" placeholder="ตั้งแต่">
+        <input class="input" type="number" id="fFloorMax" placeholder="ถึง">
+      </div>
+    </div>
+
+    <div class="fgroup">
+      <h5>วิว</h5>
+      <div class="chips" id="fView"></div>
+    </div>
+
+    <div class="fgroup">
+      <h5>ทิศห้อง</h5>
+      <select class="select" id="fDirection"><option value="">ทุกทิศ</option></select>
+    </div>
+
+    <div class="fgroup">
+      <h5>เฟอร์นิเจอร์</h5>
+      <div class="chips" id="fFurnish"></div>
+    </div>
+
+    <div class="fgroup">
+      <h5>สถานะ</h5>
+      <label class="check"><input type="checkbox" id="fOnlyAvail" checked><span>แสดงเฉพาะห้องว่าง</span></label>
+      <label class="check" style="margin-top:10px"><input type="checkbox" id="fOnlyPromo"><span>เฉพาะห้องที่มีส่วนลด</span></label>
+    </div>
+  </aside>
+
+  <!-- ============ RESULTS ============ -->
+  <section>
+    <div class="results-head">
+      <div>
+        <div style="font-size:20px;font-weight:700" id="countLabel">—</div>
+        <div class="tiny muted" id="rangeLabel"></div>
+      </div>
+      <div class="row" style="gap:12px">
+        <select class="select" id="sortBy" style="width:auto">
+          <option value="price_asc">ราคา: ต่ำ → สูง</option>
+          <option value="price_desc">ราคา: สูง → ต่ำ</option>
+          <option value="area_desc">พื้นที่มากที่สุด</option>
+          <option value="psm_asc">ราคา/ตร.ม. ถูกที่สุด</option>
+          <option value="floor_desc">ชั้นสูงที่สุด</option>
+        </select>
+        <div class="viewtabs">
+          <button class="on" data-view="grid">การ์ด</button>
+          <button data-view="table">ตาราง</button>
+          <button data-view="stack">ผังตึก</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="results"></div>
+  </section>
+</main>
+
+<script>
+/* ---------- state ---------- */
+const F = { project: qs.get('project')||'', budget: 40000000, beds: [], types: [], views: [], furnish: [],
+            areaMin:null, areaMax:null, floorMin:null, floorMax:null, direction:'', onlyAvail:true, onlyPromo:false };
+let VIEW = 'grid';
+
+/* ---------- build filter controls ---------- */
+const projSel = document.getElementById('fProject');
+Store.projects().forEach(p => projSel.insertAdjacentHTML('beforeend', `<option value="${p.id}">${p.nameTh}</option>`));
+projSel.value = F.project;
+
+const dirSel = document.getElementById('fDirection');
+[...new Set(Store.units().map(u=>u.direction))].sort().forEach(d=>dirSel.insertAdjacentHTML('beforeend',`<option>${d}</option>`));
+
+function chipGroup(elId, values, key){
+  const el = document.getElementById(elId);
+  el.innerHTML = values.map(v=>`<span class="chip" data-v="${v}">${v}</span>`).join('');
+  el.querySelectorAll('.chip').forEach(c=>c.onclick=()=>{
+    c.classList.toggle('on');
+    const v = c.dataset.v;
+    const arr = F[key]; const i = arr.indexOf(v);
+    if(i>=0) arr.splice(i,1); else arr.push(v);
+    render();
+  });
+}
+chipGroup('fBed', ['1','2','3','4+'], 'beds');
+chipGroup('fType', [...new Set(Store.units().map(u=>u.roomType))], 'types');
+chipGroup('fView', [...new Set(Store.units().map(u=>u.view))], 'views');
+chipGroup('fFurnish', ['Bare shell','Partly furnished','Fully furnished'], 'furnish');
+
+const bind = (id, key, cast) => {
+  const el = document.getElementById(id);
+  el.addEventListener('input', ()=>{ F[key] = cast ? cast(el.value) : el.value; render(); });
+};
+bind('fProject','project');
+bind('fAreaMin','areaMin', v=>v?+v:null);
+bind('fAreaMax','areaMax', v=>v?+v:null);
+bind('fFloorMin','floorMin', v=>v?+v:null);
+bind('fFloorMax','floorMax', v=>v?+v:null);
+bind('fDirection','direction');
+document.getElementById('fBudget').addEventListener('input', e=>{ F.budget=+e.target.value; render(); });
+document.getElementById('fOnlyAvail').addEventListener('change', e=>{ F.onlyAvail=e.target.checked; render(); });
+document.getElementById('fOnlyPromo').addEventListener('change', e=>{ F.onlyPromo=e.target.checked; render(); });
+document.getElementById('sortBy').addEventListener('change', render);
+document.querySelectorAll('.viewtabs button').forEach(b=>b.onclick=()=>{
+  document.querySelectorAll('.viewtabs button').forEach(x=>x.classList.remove('on'));
+  b.classList.add('on'); VIEW=b.dataset.view; render();
+});
+
+function resetFilters(){
+  Object.assign(F,{project:'',budget:40000000,beds:[],types:[],views:[],furnish:[],areaMin:null,areaMax:null,floorMin:null,floorMax:null,direction:'',onlyAvail:true,onlyPromo:false});
+  document.querySelectorAll('.chip.on').forEach(c=>c.classList.remove('on'));
+  ['fAreaMin','fAreaMax','fFloorMin','fFloorMax'].forEach(i=>document.getElementById(i).value='');
+  projSel.value=''; dirSel.value=''; document.getElementById('fBudget').value=40000000;
+  document.getElementById('fOnlyAvail').checked=true; document.getElementById('fOnlyPromo').checked=false;
+  render();
+}
+
+/* ---------- filter + sort ---------- */
+function apply(){
+  let list = Store.units();
+  if(F.project) list = list.filter(u=>u.projectId===F.project);
+  list = list.filter(u=>u.priceNet <= F.budget);
+  if(F.beds.length) list = list.filter(u=> F.beds.includes(u.bedrooms>=4?'4+':String(u.bedrooms)));
+  if(F.types.length) list = list.filter(u=>F.types.includes(u.roomType));
+  if(F.views.length) list = list.filter(u=>F.views.includes(u.view));
+  if(F.furnish.length) list = list.filter(u=>F.furnish.includes(u.furnishing));
+  if(F.areaMin) list = list.filter(u=>u.usableAreaSqm>=F.areaMin);
+  if(F.areaMax) list = list.filter(u=>u.usableAreaSqm<=F.areaMax);
+  if(F.floorMin) list = list.filter(u=>u.floor>=F.floorMin);
+  if(F.floorMax) list = list.filter(u=>u.floor<=F.floorMax);
+  if(F.direction) list = list.filter(u=>u.direction===F.direction);
+  if(F.onlyAvail) list = list.filter(u=>u.status==='Available');
+  if(F.onlyPromo) list = list.filter(u=>u.discount>0);
+
+  const s = document.getElementById('sortBy').value;
+  const cmp = {
+    price_asc:(a,b)=>a.priceNet-b.priceNet, price_desc:(a,b)=>b.priceNet-a.priceNet,
+    area_desc:(a,b)=>b.usableAreaSqm-a.usableAreaSqm, psm_asc:(a,b)=>a.pricePerSqm-b.pricePerSqm,
+    floor_desc:(a,b)=>b.floor-a.floor
+  }[s];
+  return list.sort(cmp);
+}
+
+/* ---------- render ---------- */
+function render(){
+  document.getElementById('fBudgetLabel').textContent = 'ไม่เกิน ' + fmt.short(F.budget) + ' บาท';
+  const list = apply();
+  document.getElementById('countLabel').textContent = `พบ ${list.length} ห้อง`;
+  document.getElementById('rangeLabel').textContent = list.length
+    ? `ราคา ${fmt.baht(Math.min(...list.map(u=>u.priceNet)))} – ${fmt.baht(Math.max(...list.map(u=>u.priceNet)))}`
+    : 'ลองปรับตัวกรองให้กว้างขึ้น';
+
+  const box = document.getElementById('results');
+  if(!list.length){ box.innerHTML = `<div class="empty"><div style="font-size:44px;margin-bottom:14px">🔍</div><h3>ไม่พบห้องที่ตรงเงื่อนไข</h3><p style="margin-top:8px">ลองเพิ่มงบประมาณ หรือเอาตัวกรองบางอย่างออก</p><button class="btn btn-ghost" style="margin-top:20px" onclick="resetFilters()">ล้างตัวกรองทั้งหมด</button></div>`; return; }
+
+  if(VIEW==='grid'){
+    box.innerHTML = `<div class="unitgrid">${list.slice(0,60).map(unitCard).join('')}</div>`
+      + (list.length>60?`<p class="center muted tiny" style="margin-top:26px">แสดง 60 จาก ${list.length} ห้อง — ใช้ตัวกรองเพื่อดูผลที่แคบลง</p>`:'');
+  }
+  else if(VIEW==='table'){
+    box.innerHTML = `<div class="tablewrap"><table>
+      <thead><tr>
+        <th>ห้อง</th><th>โครงการ</th><th>แบบ</th><th class="num">ชั้น</th><th class="num">พื้นที่</th>
+        <th>ทิศ / วิว</th><th class="num">ราคาสุทธิ</th><th class="num">บาท/ตร.ม.</th><th class="num">ส่วนกลาง/ด.</th><th>สถานะ</th><th></th>
+      </tr></thead><tbody>
+      ${list.slice(0,150).map(u=>{const p=Store.project(u.projectId);return `<tr>
+        <td><b>${u.unitNo}</b><div class="tiny muted">${u.layoutCode}</div></td>
+        <td class="tiny">${p.nameTh}</td>
+        <td>${u.roomType}</td>
+        <td class="num">${u.floor}</td>
+        <td class="num">${u.usableAreaSqm}<div class="tiny muted">+${u.balconyAreaSqm} ระเบียง</div></td>
+        <td class="tiny">${u.direction}<div class="muted">${u.view}</div></td>
+        <td class="num"><b>${fmt.baht(u.priceNet)}</b>${u.discount?`<div class="tiny accent">ลด ${fmt.short(u.discount)}</div>`:''}</td>
+        <td class="num">${fmt.num(u.pricePerSqm)}</td>
+        <td class="num">${fmt.baht(u.commonFeeMonthly)}</td>
+        <td>${badge(u.status)}</td>
+        <td><a class="btn btn-sm ${u.status==='Available'?'btn-primary':'btn-ghost'}" href="unit.html?id=${encodeURIComponent(u.id)}">${u.status==='Available'?'จอง':'ดู'}</a></td>
+      </tr>`;}).join('')}
+      </tbody></table></div>`;
+  }
+  else { renderStack(); }
+  initReveal();
+}
+
+/* ---------- stacking plan ---------- */
+function renderStack(){
+  const pid = F.project || Store.projects()[0].id;
+  const p = Store.project(pid);
+  const all = Store.units({projectId:pid});
+  const visible = new Set(apply().map(u=>u.id));
+  const byFloor = {};
+  all.forEach(u=>{ (byFloor[u.floor] = byFloor[u.floor]||[]).push(u); });
+  const floors = Object.keys(byFloor).map(Number).sort((a,b)=>b-a);
+
+  document.getElementById('results').innerHTML = `
+    <div class="card" style="margin-bottom:20px">
+      <div class="row-between wrapflex">
+        <div><h3>${p.nameTh}</h3><p class="tiny" style="margin-top:6px">${p.address} · ${p.floors} ชั้น · ${p.totalUnits} ยูนิต</p></div>
+        <div class="row" style="gap:26px">
+          <div><div class="tiny muted">ว่าง</div><div style="font-size:20px;font-weight:700" class="accent">${all.filter(u=>u.status==='Available').length}</div></div>
+          <div><div class="tiny muted">จอง/สัญญา</div><div style="font-size:20px;font-weight:700">${all.filter(u=>['Reserved','Contracted'].includes(u.status)).length}</div></div>
+          <div><div class="tiny muted">ขายแล้ว</div><div style="font-size:20px;font-weight:700">${all.filter(u=>u.status==='Sold').length}</div></div>
+        </div>
+      </div>
+    </div>
+    <div class="legend">
+      <span><i style="background:rgba(214,255,102,.4)"></i>ว่าง</span>
+      <span><i style="background:rgba(251,191,36,.4)"></i>จองแล้ว</span>
+      <span><i style="background:rgba(96,165,250,.4)"></i>ทำสัญญาแล้ว</span>
+      <span><i style="background:rgba(248,113,113,.4)"></i>ขายแล้ว</span>
+      <span><i style="background:rgba(255,255,255,.1)"></i>ปิดการขาย</span>
+      <span class="muted">· กล่องที่จางลงคือไม่ตรงตัวกรอง · คลิกเพื่อดูรายละเอียด</span>
+    </div>
+    <div class="card stack">
+      ${floors.map(f=>`
+        <div class="stackrow">
+          <div class="fl">ชั้น ${f}</div>
+          <div class="cells">${byFloor[f].sort((a,b)=>a.unitNo.localeCompare(b.unitNo)).map(u=>`
+            <a class="cell c-${u.status.replace(' ','')}" href="unit.html?id=${encodeURIComponent(u.id)}"
+               style="${visible.has(u.id)?'':'opacity:.22'}"
+               title="${u.unitNo} · ${u.roomType} · ${u.usableAreaSqm} ตร.ม. · ${fmt.baht(u.priceNet)} · ${u.status}">
+               ${u.unitNo.split('-')[1]||u.unitNo}</a>`).join('')}
+          </div>
+        </div>`).join('')}
+    </div>`;
+}
+
+render();
+renderFooter();
+</script>
+</body>
+</html>

@@ -1,0 +1,368 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>บัญชีของฉัน — NIRA Residence</title>
+<link rel="icon" href="assets/img/favicon.png" type="image/png">
+<link rel="apple-touch-icon" href="assets/img/apple-touch-icon.png">
+<link rel="stylesheet" href="assets/theme.css">
+<style>
+.page{padding:calc(var(--nav-h) + 40px) 0 90px;}
+.acct{display:grid;grid-template-columns:250px 1fr;gap:30px;align-items:start;}
+@media(max-width:940px){.acct{grid-template-columns:1fr;}}
+.sidemenu{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-lg);padding:12px;display:grid;gap:3px;position:sticky;top:calc(var(--nav-h) + 20px);}
+.sidemenu button{background:none;border:0;text-align:left;padding:12px 16px;border-radius:var(--r-sm);cursor:pointer;color:var(--muted);font-size:14.5px;display:flex;gap:11px;align-items:center;}
+.sidemenu button:hover{background:rgba(255,255,255,.04);color:#fff;}
+.sidemenu button.on{background:var(--accent);color:#0A0A0A;font-weight:600;}
+.pane{display:none;} .pane.on{display:block;}
+/* timeline */
+.tl{display:grid;gap:0;margin-top:20px;}
+.tl-item{display:grid;grid-template-columns:30px 1fr;gap:16px;padding-bottom:26px;position:relative;}
+.tl-item::before{content:"";position:absolute;left:14px;top:26px;bottom:0;width:2px;background:var(--line);}
+.tl-item:last-child::before{display:none;}
+.tl-dot{width:30px;height:30px;border-radius:50%;background:var(--surface-2);border:2px solid var(--line);display:grid;place-items:center;font-size:12px;z-index:1;}
+.tl-item.done .tl-dot{background:var(--accent);border-color:var(--accent);color:#0A0A0A;}
+.tl-item.done::before{background:rgba(214,255,102,.4);}
+.tl-item.now .tl-dot{border-color:var(--accent);color:var(--accent);box-shadow:0 0 0 5px rgba(214,255,102,.14);}
+.progress{height:8px;border-radius:99px;background:var(--surface-3);overflow:hidden;}
+.progress i{display:block;height:100%;background:linear-gradient(90deg,var(--accent),#9BE03C);transition:width .8s cubic-bezier(.16,1,.3,1);}
+.login-card{max-width:460px;margin:60px auto;}
+</style>
+</head>
+<body>
+<script src="assets/data.js"></script>
+<script src="assets/ui.js"></script>
+<script>boot('บัญชีของฉัน')</script>
+
+<main class="page"><div class="wrap" id="root"></div></main>
+
+<script>
+const S = Store.session();
+const cus = S ? Store.customer(S.customerId) : null;
+
+/* ================= LOGIN ================= */
+function renderLogin(){
+  document.getElementById('root').innerHTML = `
+  <div class="card login-card">
+    <div class="glow glow-lime glow-sm" style="right:-120px;top:-140px"></div>
+    <div class="rel">
+      <h2 style="font-size:26px">เข้าสู่ระบบลูกค้า</h2>
+      <p class="tiny" style="margin-top:10px">ติดตามสถานะการจอง ตารางผ่อนดาวน์ เอกสาร และนัดหมายของคุณ</p>
+      <form style="display:grid;gap:16px;margin-top:26px" onsubmit="doLogin(event)">
+        <div class="field"><label>อีเมลหรือเบอร์โทรศัพท์</label><input class="input" id="lgUser" value="thanakrit.w@example.com" required></div>
+        <div class="field"><label>รหัสผ่าน / OTP</label><input class="input" type="password" id="lgPass" value="demo1234" required></div>
+        <button class="btn btn-primary btn-block">เข้าสู่ระบบ</button>
+      </form>
+      <hr class="divider" style="margin:24px 0">
+      <p class="tiny muted" style="margin-bottom:12px">บัญชีสาธิต — เลือกเพื่อเข้าสู่ระบบทันที</p>
+      <div style="display:grid;gap:8px">
+        ${Store.db.customers.map(c=>{
+          const n = Store.bookingsOf(c.id).length;
+          return `<button class="btn btn-ghost btn-sm" style="justify-content:space-between" onclick="loginAs('${c.id}')">
+            <span>${c.prefix} ${c.firstName} ${c.lastName}</span><span class="tiny muted">${n} ใบจอง</span></button>`;
+        }).join('')}
+      </div>
+    </div>
+  </div>`;
+  renderFooter();
+}
+function doLogin(e){ e.preventDefault(); loginAs('CUS-1001'); }
+function loginAs(id){ Store.setSession({customerId:id}); location.reload(); }
+function logout(){ Store.setSession(null); location.reload(); }
+
+/* ================= ACCOUNT ================= */
+function renderAccount(){
+  const bookings = Store.bookingsOf(cus.id);
+  const favs = Store.db.favorites.map(id=>Store.unit(id)).filter(Boolean);
+  const appts = Store.appointments().filter(a=>a.customerId===cus.id);
+
+  document.getElementById('root').innerHTML = `
+  <div class="row-between wrapflex" style="margin-bottom:30px">
+    <div>
+      <div class="tiny muted">ยินดีต้อนรับกลับมา</div>
+      <h1 style="font-size:clamp(26px,3vw,38px);margin-top:6px">${cus.prefix} ${cus.firstName} ${cus.lastName}</h1>
+      <div class="tiny muted" style="margin-top:8px">${cus.email} · ${cus.phone} · รหัสลูกค้า ${cus.id}</div>
+    </div>
+    <button class="btn btn-ghost btn-sm" onclick="logout()">ออกจากระบบ</button>
+  </div>
+
+  <div class="acct">
+    <nav class="sidemenu" id="menu">
+      <button class="on" data-p="overview">🏠 ภาพรวม</button>
+      <button data-p="bookings">📄 การจองของฉัน <span class="badge badge-mute" style="margin-left:auto">${bookings.length}</span></button>
+      <button data-p="pay">💳 ตารางผ่อนชำระ</button>
+      <button data-p="docs">📎 เอกสาร</button>
+      <button data-p="fav">♥ ห้องที่บันทึก <span class="badge badge-mute" style="margin-left:auto">${favs.length}</span></button>
+      <button data-p="appt">🗓 นัดหมาย</button>
+      <button data-p="profile">⚙️ โปรไฟล์ &amp; PDPA</button>
+    </nav>
+
+    <div>
+      <div class="pane on" id="p-overview">${paneOverview(bookings, appts)}</div>
+      <div class="pane" id="p-bookings">${paneBookings(bookings)}</div>
+      <div class="pane" id="p-pay">${panePay(bookings)}</div>
+      <div class="pane" id="p-docs">${paneDocs(bookings)}</div>
+      <div class="pane" id="p-fav">${paneFav(favs)}</div>
+      <div class="pane" id="p-appt">${paneAppt(appts)}</div>
+      <div class="pane" id="p-profile">${paneProfile()}</div>
+    </div>
+  </div>`;
+
+  document.querySelectorAll('#menu button').forEach(b=>b.onclick=()=>{
+    document.querySelectorAll('#menu button').forEach(x=>x.classList.remove('on'));
+    document.querySelectorAll('.pane').forEach(x=>x.classList.remove('on'));
+    b.classList.add('on'); document.getElementById('p-'+b.dataset.p).classList.add('on');
+    initReveal();
+  });
+  renderFooter(); initReveal();
+}
+
+/* ---- overview ---- */
+const STAGES = ['จอง','ทำสัญญา','ผ่อนดาวน์','ยื่นสินเชื่อ','ตรวจรับห้อง','โอนกรรมสิทธิ์'];
+function stageIndex(b){
+  return {'Reserved':0,'Contract signed':1,'Down paying':2,'Loan approval':3,'Ready to transfer':4,'Transferred':5}[b.status] ?? 0;
+}
+function paneOverview(bookings, appts){
+  if(!bookings.length) return `<div class="card center" style="padding:60px 30px"><div style="font-size:44px">🏙</div><h3 style="margin-top:14px">คุณยังไม่มีการจอง</h3><p style="margin:10px 0 22px">เริ่มต้นเลือกห้องที่ถูกใจได้เลย</p><a class="btn btn-primary" href="units.html">ดูห้องว่าง</a></div>`;
+  const b = bookings[0], u = Store.unit(b.unitId), p = Store.project(b.projectId);
+  const paid = Store.payments(b.id).filter(x=>x.status==='Verified').reduce((s,x)=>s+x.amount,0);
+  const pctRaw = paid / (b.priceNet||u.priceNet) * 100;
+  const pct = pctRaw < 1 ? +pctRaw.toFixed(1) : Math.round(pctRaw);
+  const si = stageIndex(b);
+  const nextDue = (b.installments||[]).find(i=>i.status==='Pending');
+  return `
+  <div class="grid g4 reveal" style="margin-bottom:22px">
+    <div class="card"><div class="tiny muted">ใบจองทั้งหมด</div><div style="font-size:28px;font-weight:700;margin-top:6px">${bookings.length}</div></div>
+    <div class="card"><div class="tiny muted">ชำระแล้วสะสม</div><div style="font-size:28px;font-weight:700;margin-top:6px" class="accent">${fmt.short(paid)}</div></div>
+    <div class="card"><div class="tiny muted">งวดถัดไป</div><div style="font-size:28px;font-weight:700;margin-top:6px">${nextDue?fmt.short(nextDue.amount):'—'}</div><div class="tiny muted">${nextDue?fmt.date(nextDue.dueDate):'ไม่มีงวดค้าง'}</div></div>
+    <div class="card"><div class="tiny muted">นัดหมายที่จะถึง</div><div style="font-size:28px;font-weight:700;margin-top:6px">${appts.length}</div></div>
+  </div>
+
+  <div class="card reveal">
+    <div class="row-between wrapflex" style="margin-bottom:20px">
+      <div><div class="tiny muted">${p.nameTh}</div><h3 style="margin-top:5px">ห้อง ${u.unitNo} · ${u.roomType}</h3></div>
+      ${badge(b.status)}
+    </div>
+    <div class="row-between tiny" style="margin-bottom:8px"><span>ชำระแล้ว ${fmt.baht(paid)}</span><span class="accent">${pct}% ของราคาห้อง ${fmt.baht(b.priceNet||u.priceNet)}</span></div>
+    <div class="progress"><i style="width:${pct}%"></i></div>
+
+    <div class="tl" style="margin-top:30px">
+      ${STAGES.map((s,i)=>`
+        <div class="tl-item ${i<si?'done':i===si?'now':''}">
+          <div class="tl-dot">${i<si?'✓':i+1}</div>
+          <div>
+            <div style="font-weight:600">${s}</div>
+            <div class="tiny muted" style="margin-top:4px">${stageNote(s,b,u,p,i,si)}</div>
+          </div>
+        </div>`).join('')}
+    </div>
+  </div>
+
+  <div class="card reveal" style="margin-top:22px">
+    <h4>ที่ปรึกษาการขายของคุณ</h4>
+    <div class="row-between wrapflex" style="margin-top:16px">
+      <div class="row" style="gap:13px">
+        <div style="width:46px;height:46px;border-radius:50%;background:var(--surface-2);border:1px solid var(--line);display:grid;place-items:center;font-weight:700;color:var(--accent)">${b.salesOwner.charAt(3)||'N'}</div>
+        <div><div style="font-weight:600">${b.salesOwner}</div><div class="tiny muted">ดูแลใบจอง ${b.bookingNo}</div></div>
+      </div>
+      <div class="row" style="gap:10px"><a class="btn btn-ghost btn-sm" href="tel:021234567">โทร</a><a class="btn btn-ghost btn-sm" href="#">LINE</a></div>
+    </div>
+  </div>`;
+}
+function stageNote(s,b,u,p,i,si){
+  if(i<si) return 'เสร็จสิ้นแล้ว';
+  if(s==='จอง') return `ชำระเงินจอง ${fmt.baht(b.bookingFee)} เมื่อ ${fmt.date(b.bookingDate)}`;
+  if(s==='ทำสัญญา') return b.contractDate?`เซ็นสัญญาแล้วเมื่อ ${fmt.date(b.contractDate)}`:`ต้องเซ็นสัญญาและชำระ ${fmt.baht(b.contractFee)} ภายใน ${fmt.date(b.expireDate)}`;
+  if(s==='ผ่อนดาวน์'){const done=(b.installments||[]).filter(x=>x.status==='Paid').length;return `ชำระแล้ว ${done}/${(b.installments||[]).length} งวด`;}
+  if(s==='ยื่นสินเชื่อ') return `${b.loan?.bank||'-'} · วงเงิน ${fmt.baht(b.loan?.amount||0)} · ${b.loan?.status||'ยังไม่ยื่น'}`;
+  if(s==='ตรวจรับห้อง') return `นัดตรวจรับก่อนวันโอน 14–30 วัน (กำหนดโอน ${p.quarterCompleted})`;
+  return `ยอดคงเหลือวันโอน ${fmt.baht(b.transferAmount)} + ค่าใช้จ่ายวันโอน ~${fmt.baht(b.transferCosts||0)}`;
+}
+
+/* ---- bookings ---- */
+function paneBookings(bookings){
+  if(!bookings.length) return emptyBox('ยังไม่มีใบจอง');
+  return bookings.map(b=>{
+    const u=Store.unit(b.unitId), p=Store.project(b.projectId);
+    return `<div class="card reveal" style="margin-bottom:20px">
+      <div class="row-between wrapflex" style="margin-bottom:18px">
+        <div><div class="tiny muted">เลขที่ใบจอง</div><div style="font-size:20px;font-weight:700">${b.bookingNo}</div></div>
+        <div class="row" style="gap:10px">${badge(b.status)}<button class="btn btn-ghost btn-sm" onclick="window.print()">พิมพ์</button></div>
+      </div>
+      <div class="grid g2" style="gap:0 26px">
+        <div class="kv"><span class="k">โครงการ</span><span class="v">${p.nameTh}</span></div>
+        <div class="kv"><span class="k">ห้อง</span><span class="v">${u.unitNo} ชั้น ${u.floor} · ${u.roomType}</span></div>
+        <div class="kv"><span class="k">พื้นที่</span><span class="v">${u.usableAreaSqm} ตร.ม.</span></div>
+        <div class="kv"><span class="k">ราคาสุทธิ</span><span class="v">${fmt.baht(b.priceNet||u.priceNet)}</span></div>
+        <div class="kv"><span class="k">วันที่จอง</span><span class="v">${fmt.date(b.bookingDate)}</span></div>
+        <div class="kv"><span class="k">ครบกำหนดทำสัญญา</span><span class="v">${fmt.date(b.expireDate)}</span></div>
+        <div class="kv"><span class="k">เงินจอง</span><span class="v">${fmt.baht(b.bookingFee)}</span></div>
+        <div class="kv"><span class="k">เงินทำสัญญา</span><span class="v">${fmt.baht(b.contractFee)}</span></div>
+        <div class="kv"><span class="k">เงินดาวน์รวม</span><span class="v">${fmt.baht(b.downTotal)}</span></div>
+        <div class="kv"><span class="k">ยอดวันโอน</span><span class="v">${fmt.baht(b.transferAmount)}</span></div>
+      </div>
+      ${b.promotions?.length?`<div style="margin-top:16px;display:flex;gap:8px;flex-wrap:wrap">${b.promotions.map(x=>`<span class="badge badge-accent">🎁 ${x}</span>`).join('')}</div>`:''}
+      <div class="row" style="gap:10px;margin-top:20px">
+        <a class="btn btn-ghost btn-sm" href="unit.html?id=${encodeURIComponent(u.id)}">ดูห้อง</a>
+        <button class="btn btn-ghost btn-sm" onclick="toast('ส่งคำขอไปยังเจ้าหน้าที่แล้ว')">ขอเลื่อนนัดเซ็นสัญญา</button>
+        <button class="btn btn-ghost btn-sm" onclick="toast('เจ้าหน้าที่จะติดต่อกลับเพื่อยืนยัน',true)">ขอยกเลิกการจอง</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+/* ---- payments ---- */
+function panePay(bookings){
+  if(!bookings.length) return emptyBox('ยังไม่มีรายการชำระเงิน');
+  return bookings.map(b=>{
+    const pays = Store.payments(b.id);
+    const u = Store.unit(b.unitId);
+    return `
+    <div class="card reveal" style="margin-bottom:20px">
+      <h4>ตารางผ่อนดาวน์ · ${b.bookingNo} (ห้อง ${u.unitNo})</h4>
+      <div class="tablewrap" style="margin-top:16px;border:0"><table>
+        <thead><tr><th>งวด</th><th>ครบกำหนด</th><th class="num">จำนวนเงิน</th><th>สถานะ</th><th></th></tr></thead>
+        <tbody>${(b.installments||[]).map(i=>`<tr>
+          <td>${i.no}</td><td>${fmt.date(i.dueDate)}</td><td class="num">${fmt.baht(i.amount)}</td>
+          <td>${badge(i.status)}</td>
+          <td>${i.status==='Pending'?`<button class="btn btn-sm btn-primary" onclick="payNow('${b.id}',${i.no})">ชำระ</button>`:`<span class="tiny muted">${fmt.date(i.paidAt)}</span>`}</td>
+        </tr>`).join('')}</tbody></table></div>
+    </div>
+
+    <div class="card reveal" style="margin-bottom:20px">
+      <h4>ประวัติการชำระเงิน</h4>
+      <div class="tablewrap" style="margin-top:16px;border:0"><table>
+        <thead><tr><th>รายการ</th><th>วันที่</th><th>ช่องทาง</th><th class="num">จำนวนเงิน</th><th>สถานะ</th><th>ใบเสร็จ</th></tr></thead>
+        <tbody>${pays.map(x=>`<tr>
+          <td>${x.type}</td><td>${fmt.date(x.paidAt)}</td><td class="tiny">${x.method}</td>
+          <td class="num">${fmt.baht(x.amount)}</td><td>${badge(x.status)}</td>
+          <td>${x.receiptNo!=='-'?`<a class="tiny accent" href="#" onclick="toast('ดาวน์โหลดใบเสร็จ ${x.receiptNo}');return false">${x.receiptNo}</a>`:'<span class="tiny muted">รอออก</span>'}</td>
+        </tr>`).join('')}</tbody></table></div>
+      <div class="kv total" style="margin-top:14px"><span class="k">รวมชำระแล้ว (ตรวจสอบผ่าน)</span><span class="v">${fmt.baht(pays.filter(x=>x.status==='Verified').reduce((s,x)=>s+x.amount,0))}</span></div>
+    </div>`;
+  }).join('');
+}
+function payNow(bid, no){
+  const b = Store.booking(bid); const it = b.installments.find(i=>i.no===no);
+  openModal(`<h3>ชำระค่างวดที่ ${no}</h3>
+    <div class="kv" style="margin-top:18px"><span class="k">ใบจอง</span><span class="v">${b.bookingNo}</span></div>
+    <div class="kv"><span class="k">ครบกำหนด</span><span class="v">${fmt.date(it.dueDate)}</span></div>
+    <div class="kv total"><span class="k">จำนวนเงิน</span><span class="v">${fmt.baht(it.amount)}</span></div>
+    <div class="field" style="margin-top:20px"><label>ช่องทางชำระ</label>
+      <select class="select" id="pm"><option>QR PromptPay</option><option>โอนผ่านธนาคาร</option><option>บัตรเครดิต</option></select></div>
+    <div class="row" style="gap:12px;margin-top:22px">
+      <button class="btn btn-ghost" style="flex:1" onclick="closeModal()">ยกเลิก</button>
+      <button class="btn btn-primary" style="flex:1" onclick="confirmPay('${bid}',${no})">ยืนยันชำระ</button>
+    </div>`);
+}
+function confirmPay(bid,no){
+  const b=Store.booking(bid), it=b.installments.find(i=>i.no===no);
+  const method=document.getElementById('pm').value;
+  it.status='Paid'; it.paidAt=new Date().toISOString().slice(0,10);
+  Store.addPayment({bookingId:bid,type:`ผ่อนดาวน์ งวดที่ ${no}`,amount:it.amount,method,
+    paidAt:it.paidAt,status:method==='QR PromptPay'?'Verified':'Waiting verify',
+    receiptNo:method==='QR PromptPay'?'RC-'+Date.now().toString().slice(-8):'-'});
+  if(b.status==='Reserved'||b.status==='Contract signed') b.status='Down paying';
+  Store.save(); closeModal(); toast('ชำระค่างวดเรียบร้อย'); renderAccount();
+  setTimeout(()=>document.querySelector('#menu button[data-p="pay"]').click(),50);
+}
+
+/* ---- docs ---- */
+function paneDocs(bookings){
+  if(!bookings.length) return emptyBox('ยังไม่มีเอกสาร');
+  return bookings.map(b=>`
+    <div class="card reveal" style="margin-bottom:20px">
+      <h4>เอกสารประกอบใบจอง ${b.bookingNo}</h4>
+      <p class="tiny" style="margin-top:8px">อัปโหลดเอกสารให้ครบเพื่อให้ทีมสินเชื่อยื่นกู้ได้เร็วขึ้น</p>
+      <div style="margin-top:18px;display:grid;gap:10px">
+        ${(b.documents||[]).map((d,i)=>`
+          <div class="row-between" style="padding:14px 16px;border:1px solid var(--line);border-radius:var(--r-sm);background:var(--surface-2)">
+            <div class="row" style="gap:12px"><span>${d.status==='Received'?'✅':'📄'}</span><span style="font-size:14.5px">${d.name}</span></div>
+            <div class="row" style="gap:10px">${badge(d.status)}
+              ${d.status!=='Received'?`<button class="btn btn-sm btn-ghost" onclick="uploadDoc('${b.id}',${i})">อัปโหลด</button>`:'<span class="tiny muted">แก้ไข</span>'}</div>
+          </div>`).join('')}
+      </div>
+      <hr class="divider" style="margin:22px 0">
+      <h4 style="font-size:15px">เอกสารจากบริษัท</h4>
+      <div style="margin-top:14px;display:grid;gap:10px">
+        <div class="row-between" style="padding:14px 16px;border:1px solid var(--line);border-radius:var(--r-sm)">
+          <span style="font-size:14.5px">📄 ใบจองห้องชุด ${b.bookingNo}</span>
+          <a class="tiny accent" href="#" onclick="toast('ดาวน์โหลดใบจอง');return false">ดาวน์โหลด</a></div>
+        <div class="row-between" style="padding:14px 16px;border:1px solid var(--line);border-radius:var(--r-sm)">
+          <span style="font-size:14.5px">📄 สัญญาจะซื้อจะขาย (ฉบับร่าง)</span>
+          <a class="tiny accent" href="#" onclick="toast('ดาวน์โหลดสัญญา');return false">ดาวน์โหลด</a></div>
+        <div class="row-between" style="padding:14px 16px;border:1px solid var(--line);border-radius:var(--r-sm)">
+          <span style="font-size:14.5px">📄 ใบเสนอราคาและตารางผ่อนชำระ</span>
+          <a class="tiny accent" href="#" onclick="toast('ดาวน์โหลดใบเสนอราคา');return false">ดาวน์โหลด</a></div>
+      </div>
+    </div>`).join('');
+}
+function uploadDoc(bid,i){
+  const b=Store.booking(bid); b.documents[i].status='Received'; Store.save();
+  toast('อัปโหลดเอกสารเรียบร้อย'); renderAccount();
+  setTimeout(()=>document.querySelector('#menu button[data-p="docs"]').click(),50);
+}
+
+/* ---- favourites ---- */
+function paneFav(favs){
+  if(!favs.length) return emptyBox('ยังไม่มีห้องที่บันทึกไว้','ไปเลือกห้อง','units.html');
+  return `<div class="grid g3">${favs.map(unitCard).join('')}</div>`;
+}
+
+/* ---- appointments ---- */
+function paneAppt(appts){
+  if(!appts.length) return emptyBox('ยังไม่มีนัดหมาย','นัดชมห้อง','units.html');
+  return appts.map(a=>{
+    const p=Store.project(a.projectId);
+    return `<div class="card reveal" style="margin-bottom:16px">
+      <div class="row-between wrapflex">
+        <div><h4>${p.nameTh}</h4><div class="tiny muted" style="margin-top:6px">${fmt.date(a.date)} · ${a.slot} · ${a.channel}</div></div>
+        <div class="row" style="gap:10px">${badge(a.status)}<button class="btn btn-ghost btn-sm" onclick="toast('ส่งคำขอเลื่อนนัดแล้ว')">เลื่อนนัด</button></div>
+      </div>
+      <div class="tiny muted" style="margin-top:12px">เจ้าหน้าที่ผู้ดูแล: ${a.owner}</div>
+    </div>`;
+  }).join('');
+}
+
+/* ---- profile ---- */
+function paneProfile(){
+  return `
+  <div class="card reveal">
+    <h4>ข้อมูลส่วนตัว</h4>
+    <div class="grid g2" style="gap:16px;margin-top:18px">
+      ${[['คำนำหน้า','prefix'],['ชื่อ','firstName'],['นามสกุล','lastName'],['สัญชาติ','nationality'],
+         ['เลขบัตร/พาสปอร์ต','idCard'],['วันเกิด','dob'],['โทรศัพท์','phone'],['อีเมล','email'],
+         ['LINE ID','lineId'],['อาชีพ','occupation'],['รายได้ต่อเดือน','monthlyIncome'],['วัตถุประสงค์','purpose']]
+        .map(([l,k])=>`<div class="field"><label>${l}</label><input class="input" value="${cus[k]??''}"></div>`).join('')}
+    </div>
+    <div class="field" style="margin-top:16px"><label>ที่อยู่</label><textarea class="textarea">${cus.address||''}</textarea></div>
+    <button class="btn btn-primary" style="margin-top:18px" onclick="toast('บันทึกข้อมูลเรียบร้อย')">บันทึกการเปลี่ยนแปลง</button>
+  </div>
+
+  <div class="card reveal" style="margin-top:20px">
+    <h4>สิทธิของเจ้าของข้อมูลส่วนบุคคล (PDPA)</h4>
+    <p class="tiny" style="margin-top:10px">คุณมีสิทธิเข้าถึง แก้ไข ขอสำเนา คัดค้าน และขอลบข้อมูลส่วนบุคคลของคุณได้ตลอดเวลา</p>
+    <div style="margin-top:18px;display:grid;gap:12px">
+      <label class="check"><input type="checkbox" checked><span>ยินยอมให้ใช้ข้อมูลเพื่อการจอง ทำสัญญา และโอนกรรมสิทธิ์ <b class="tiny muted">(จำเป็น)</b></span></label>
+      <label class="check"><input type="checkbox" checked><span>ยินยอมให้ส่งข้อมูลให้ธนาคารพันธมิตรเพื่อพิจารณาสินเชื่อ</span></label>
+      <label class="check"><input type="checkbox"><span>ยินยอมรับข่าวสารการตลาดและโปรโมชั่น</span></label>
+    </div>
+    <div class="row" style="gap:12px;margin-top:20px;flex-wrap:wrap">
+      <button class="btn btn-ghost btn-sm" onclick="toast('ส่งไฟล์ข้อมูลไปที่อีเมลของคุณแล้ว')">ขอสำเนาข้อมูลของฉัน</button>
+      <button class="btn btn-ghost btn-sm" onclick="toast('ส่งคำขอลบข้อมูลให้เจ้าหน้าที่แล้ว',true)">ขอลบข้อมูล</button>
+    </div>
+  </div>`;
+}
+
+function emptyBox(msg, cta, href){
+  return `<div class="card center" style="padding:60px 30px">
+    <div style="font-size:42px">📭</div><h3 style="margin-top:14px">${msg}</h3>
+    ${cta?`<a class="btn btn-primary" style="margin-top:20px" href="${href}">${cta}</a>`:''}</div>`;
+}
+
+/* ---- boot (ต้องเรียกท้ายสุด เพื่อให้ const/function ประกาศครบก่อน) ---- */
+if(!cus){ renderLogin(); } else { renderAccount(); }
+</script>
+</body>
+</html>

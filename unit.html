@@ -1,0 +1,415 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>รายละเอียดห้อง — NIRA Residence</title>
+<link rel="icon" href="assets/img/favicon.png" type="image/png">
+<link rel="apple-touch-icon" href="assets/img/apple-touch-icon.png">
+<link rel="stylesheet" href="assets/theme.css">
+<style>
+.page{padding:calc(var(--nav-h) + 34px) 0 90px;}
+.crumb{font-size:13.5px;color:var(--muted-2);margin-bottom:20px;}
+.crumb a:hover{color:var(--accent);}
+.detail{display:grid;grid-template-columns:1fr 390px;gap:32px;align-items:start;}
+@media(max-width:1080px){.detail{grid-template-columns:1fr;}}
+.gallery{display:grid;grid-template-columns:2fr 1fr;gap:12px;border-radius:var(--r-lg);overflow:hidden;}
+.gallery .ph{min-height:180px;}
+.gallery .main{grid-row:span 2;min-height:372px;}
+@media(max-width:640px){.gallery{grid-template-columns:1fr;}.gallery .main{grid-row:auto;min-height:240px}}
+.speclist{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--line);border:1px solid var(--line);border-radius:var(--r-md);overflow:hidden;}
+.spec{background:var(--surface);padding:18px 20px;}
+.spec .k{font-size:12.5px;color:var(--muted-2);margin-bottom:5px;}
+.spec .v{font-weight:600;font-size:15px;}
+@media(max-width:760px){.speclist{grid-template-columns:repeat(2,1fr);}}
+.side{position:sticky;top:calc(var(--nav-h) + 20px);display:grid;gap:18px;}
+.tabbar{display:flex;gap:4px;border-bottom:1px solid var(--line);margin-bottom:26px;overflow-x:auto;}
+.tabbar button{background:none;border:0;padding:14px 18px;cursor:pointer;color:var(--muted);font-size:15px;font-weight:500;border-bottom:2px solid transparent;white-space:nowrap;}
+.tabbar button.on{color:var(--accent);border-bottom-color:var(--accent);}
+.tabpane{display:none;} .tabpane.on{display:block;}
+.floorplan{aspect-ratio:1/1;max-width:420px;}
+.fac{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;}
+.fac div{display:flex;gap:10px;align-items:center;font-size:14.5px;color:var(--muted);}
+.fac span{color:var(--accent);}
+@media(max-width:640px){.fac{grid-template-columns:1fr;}}
+.quota-bar{height:9px;border-radius:99px;background:var(--surface-3);overflow:hidden;}
+.quota-bar i{display:block;height:100%;background:linear-gradient(90deg,var(--accent),#9BE03C);}
+.mini-map{aspect-ratio:16/9;border-radius:var(--r-md);}
+</style>
+</head>
+<body>
+<script src="assets/data.js"></script>
+<script src="assets/ui.js"></script>
+<script>boot('ค้นหาห้อง')</script>
+
+<main class="page"><div class="wrap" id="root"></div></main>
+
+<script>
+const u = Store.unit(qs.get('id'));
+if(!u){
+  document.getElementById('root').innerHTML =
+    `<div style="text-align:center;padding:80px 0"><h2>ไม่พบห้องที่ต้องการ</h2><p style="margin:14px 0 24px">ห้องนี้อาจถูกนำออกจากระบบแล้ว</p><a class="btn btn-primary" href="units.html">กลับไปหน้าค้นหาห้อง</a></div>`;
+} else {
+  const p = Store.project(u.projectId);
+  const plan = buildPaymentPlan(u, p);
+  const loanDefault = Math.round(u.priceNet * 0.85);
+  const bank = p.banks[0];
+  const costs = buildTransferCosts(u, p, loanDefault);
+  const m = monthlyPayment(loanDefault, bank.rate, 30);
+  const sold = ['Sold','Blocked'].includes(u.status);
+  const taken = ['Sold','Blocked','Reserved','Contracted'].includes(u.status);
+  const propertyTax = Math.round(u.priceNet * 0.0002); // ภาษีที่ดินฯ บ้านหลังแรก ~0.02%/ปี
+
+  document.getElementById('root').innerHTML = `
+  <div class="crumb"><a href="index.html">หน้าแรก</a> / <a href="units.html">ค้นหาห้อง</a> / <a href="units.html?project=${p.id}">${p.nameTh}</a> / <span style="color:var(--text)">ห้อง ${u.unitNo}</span></div>
+
+  <div class="detail">
+    <!-- ============ LEFT ============ -->
+    <div>
+      <div class="gallery reveal">
+        <div class="ph main">
+          ${imgTag(imgKey.unit(u), `ห้อง ${u.unitNo} แบบ ${u.roomType} — ${p.nameTh}`)}
+          <span class="ph-label">${u.layoutCode} · ${u.roomType}</span>
+          <div style="position:absolute;top:14px;left:14px;z-index:2;display:flex;gap:6px;flex-wrap:wrap">
+            ${badge(u.status)}${u.tags.map(t=>`<span class="badge">${t}</span>`).join('')}
+          </div>
+        </div>
+        <div class="ph no-scrim">
+          ${imgTag(imgKey.living(u), `ห้องนั่งเล่น สภาพ ${u.furnishing}`)}
+          <span class="ph-label">ห้องนั่งเล่น</span>
+        </div>
+        <div class="ph no-scrim">
+          ${imgTag(imgKey.view(u), `วิวจากห้อง — ${u.view}`)}
+          <span class="ph-label">${u.view}</span>
+        </div>
+      </div>
+
+      <div style="margin:30px 0 22px" class="reveal">
+        <div class="row-between wrapflex" style="align-items:flex-start">
+          <div>
+            <div class="tiny muted">${p.nameTh} · ${p.district} ${p.province}</div>
+            <h1 style="font-size:clamp(28px,3.4vw,40px);margin-top:8px">ห้อง ${u.unitNo} · ${u.roomType}</h1>
+            <div class="row wrapflex muted" style="gap:16px;margin-top:12px;font-size:14.5px">
+              <span>🛏 ${u.bedrooms} ห้องนอน</span><span>🛁 ${u.bathrooms} ห้องน้ำ</span>
+              <span>📐 ${u.usableAreaSqm} ตร.ม.</span><span>🏢 ชั้น ${u.floor}</span>
+              <span>🧭 หันหน้าทาง${u.direction}</span><span>🌆 ${u.view}</span>
+            </div>
+          </div>
+          <button class="btn btn-ghost btn-sm" id="favBtn" onclick="fav()">♡ บันทึก</button>
+        </div>
+      </div>
+
+      <!-- ---- tabs ---- -->
+      <div class="tabbar reveal">
+        <button class="on" data-t="spec">ข้อมูลห้อง</button>
+        <button data-t="cost">ราคา &amp; ค่าใช้จ่าย</button>
+        <button data-t="plan">ผังห้อง</button>
+        <button data-t="project">โครงการ &amp; ส่วนกลาง</button>
+        <button data-t="loc">ทำเล</button>
+      </div>
+
+      <!-- SPEC -->
+      <div class="tabpane on" id="t-spec">
+        <div class="speclist reveal">
+          ${[
+            ['รหัสยูนิต', u.id.split('-').slice(0,3).join('-')],
+            ['เลขที่ห้อง', u.unitNo],
+            ['อาคาร / ชั้น', `${u.building} / ${u.floor}`],
+            ['แบบห้อง (Layout)', `${u.roomType} · ${u.layoutCode}`],
+            ['พื้นที่ใช้สอย', `${u.usableAreaSqm} ตร.ม.`],
+            ['พื้นที่ระเบียง', `${u.balconyAreaSqm} ตร.ม.`],
+            ['พื้นที่รวมตามสัญญา', `${u.totalAreaSqm} ตร.ม.`],
+            ['ห้องนอน / ห้องน้ำ', `${u.bedrooms} / ${u.bathrooms}`],
+            ['ทิศที่หันหน้า', u.direction],
+            ['วิว', u.view],
+            ['สภาพเฟอร์นิเจอร์', u.furnishing],
+            ['ความสูงฝ้า', `${p.ceilingHeight} เมตร`],
+            ['ที่จอดรถ', `${u.parkingSlots} คัน`],
+            ['กรรมสิทธิ์', p.ownership === 'Freehold' ? 'Freehold (ถือครองถาวร)' : p.ownership],
+            ['สถานะการขาย', u.status]
+          ].map(([k,v])=>`<div class="spec"><div class="k">${k}</div><div class="v">${v}</div></div>`).join('')}
+        </div>
+
+        <h3 style="margin:34px 0 16px">สิ่งที่มีในห้องนี้</h3>
+        <div class="fac reveal">${u.features.map(f=>`<div><span>✓</span>${f}</div>`).join('')}</div>
+
+        <div class="card reveal" style="margin-top:30px">
+          <h4>สิ่งที่คุณจะได้รับเมื่อโอนกรรมสิทธิ์</h4>
+          <div class="grid g2" style="margin-top:18px;gap:14px">
+            <div class="tiny muted">📜 โฉนดห้องชุด (อ.ช.2) ในชื่อผู้ซื้อ</div>
+            <div class="tiny muted">🔑 กุญแจ + คีย์การ์ด 2 ใบ / รีโมทที่จอดรถ</div>
+            <div class="tiny muted">📘 คู่มือลูกบ้าน + ใบรับประกันงานระบบ 2 ปี</div>
+            <div class="tiny muted">🏗 รับประกันโครงสร้างอาคาร 5 ปี</div>
+            <div class="tiny muted">🧾 ใบเสร็จ / ใบกำกับภาษีครบทุกงวด</div>
+            <div class="tiny muted">👤 บัญชีลูกบ้านสำหรับจ่ายค่าส่วนกลางออนไลน์</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- COST -->
+      <div class="tabpane" id="t-cost">
+        <div class="grid g2" style="align-items:start">
+          <div class="card reveal">
+            <h4>1. ราคาห้อง</h4>
+            <div style="margin-top:16px">
+              <div class="kv"><span class="k">ราคาป้าย (List price)</span><span class="v">${fmt.baht(u.priceList)}</span></div>
+              <div class="kv"><span class="k">ส่วนลดโครงการ</span><span class="v" style="color:var(--accent)">${u.discount?'− '+fmt.baht(u.discount):'—'}</span></div>
+              <div class="kv"><span class="k">ราคาต่อตารางเมตร</span><span class="v">${fmt.baht(u.pricePerSqm)}</span></div>
+              <div class="kv total"><span class="k">ราคาสุทธิ</span><span class="v">${fmt.baht(u.priceNet)}</span></div>
+            </div>
+            ${p.promotions.length?`<div style="margin-top:20px"><div class="tiny muted" style="margin-bottom:9px">โปรโมชั่นที่ใช้ได้</div>
+              ${p.promotions.map(pr=>`<div class="badge badge-accent" style="margin:0 6px 6px 0">🎁 ${pr.name}</div>`).join('')}</div>`:''}
+          </div>
+
+          <div class="card reveal" data-delay="70">
+            <h4>2. แผนการชำระเงิน</h4>
+            <div style="margin-top:16px">
+              <div class="kv"><span class="k">เงินจอง (ชำระวันนี้)</span><span class="v">${fmt.baht(plan.booking)}</span></div>
+              <div class="kv"><span class="k">เงินทำสัญญา (ภายใน 7 วัน)</span><span class="v">${fmt.baht(plan.contract)}</span></div>
+              <div class="kv"><span class="k">เงินดาวน์รวม ${(plan.downPct*100).toFixed(0)}% (${plan.installments.length} งวด)</span><span class="v">${fmt.baht(plan.downTotal)}</span></div>
+              <div class="kv"><span class="k">ผ่อนดาวน์เฉลี่ยต่องวด</span><span class="v">${fmt.baht(plan.installments[0].amount)}</span></div>
+              <div class="kv total"><span class="k">ยอดชำระวันโอน (ยื่นสินเชื่อ)</span><span class="v">${fmt.baht(plan.transferAmount)}</span></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card reveal" style="margin-top:22px">
+          <h4>ตารางผ่อนดาวน์รายงวด</h4>
+          <div class="tablewrap" style="margin-top:16px;border:0">
+            <table><thead><tr><th>งวดที่</th><th>วันครบกำหนด</th><th class="num">จำนวนเงิน</th><th class="num">ยอดสะสม</th></tr></thead>
+            <tbody>${(()=>{let acc=plan.booking+plan.contract;return plan.installments.map(i=>{acc+=i.amount;return `<tr><td>${i.no}</td><td>${fmt.date(i.dueDate)}</td><td class="num">${fmt.baht(i.amount)}</td><td class="num muted">${fmt.baht(acc)}</td></tr>`;}).join('');})()}</tbody></table>
+          </div>
+        </div>
+
+        <div class="grid g2" style="margin-top:22px;align-items:start">
+          <div class="card reveal">
+            <h4>3. ค่าใช้จ่าย ณ วันโอนกรรมสิทธิ์ <span class="tiny muted">(ประมาณการ)</span></h4>
+            ${costs.useMeasure?`<div class="badge badge-ok" style="margin-top:12px">✓ เข้าเกณฑ์มาตรการรัฐ ลดค่าโอน–จดจำนองเหลือ 0.01%</div>`:''}
+            <div style="margin-top:16px">
+              ${costs.items.map(i=>`<div class="kv"><span class="k">${i.k}</span><span class="v">${fmt.baht(i.v)}</span></div>`).join('')}
+              <div class="kv total"><span class="k">รวมต้องเตรียมวันโอน</span><span class="v">${fmt.baht(costs.total)}</span></div>
+            </div>
+            <p class="tiny" style="margin-top:14px;color:var(--muted-2)">คำนวณจากวงเงินกู้ ${fmt.baht(loanDefault)} (85% ของราคาห้อง) ยอดจริงขึ้นกับราคาประเมินกรมที่ดินและวงเงินอนุมัติ</p>
+          </div>
+
+          <div class="card reveal" data-delay="70">
+            <h4>4. ค่าใช้จ่ายรายเดือนหลังเข้าอยู่</h4>
+            <div style="margin-top:16px">
+              <div class="kv"><span class="k">ค่าส่วนกลาง (${p.commonFeePerSqm} บ./ตร.ม./ด.)</span><span class="v">${fmt.baht(u.commonFeeMonthly)}</span></div>
+              <div class="kv"><span class="k">ค่าที่จอดรถ ${u.parkingSlots} คัน</span><span class="v">รวมในค่าส่วนกลาง</span></div>
+              <div class="kv"><span class="k">ภาษีที่ดินและสิ่งปลูกสร้าง (เฉลี่ย/ด.)</span><span class="v">${fmt.baht(Math.round(propertyTax/12))}</span></div>
+              <div class="kv"><span class="k">ค่าน้ำ–ไฟ (ประมาณการ)</span><span class="v">${fmt.baht(1200 + u.usableAreaSqm*22)}</span></div>
+              <div class="kv"><span class="k">ผ่อนธนาคาร (${bank.rate}% · 30 ปี)</span><span class="v">${fmt.baht(Math.round(m))}</span></div>
+              <div class="kv total"><span class="k">รวมภาระต่อเดือน</span><span class="v">${fmt.baht(Math.round(m)+u.commonFeeMonthly+Math.round(propertyTax/12)+1200+Math.round(u.usableAreaSqm*22))}</span></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card reveal" style="margin-top:22px">
+          <h4>5. ประมาณการสินเชื่อจากธนาคารพันธมิตร</h4>
+          <div class="tablewrap" style="margin-top:16px;border:0">
+            <table><thead><tr><th>ธนาคาร</th><th class="num">ดอกเบี้ยเฉลี่ย 3 ปีแรก</th><th class="num">วงเงินสูงสุด</th><th class="num">ผ่อน/เดือน (30 ปี)</th><th class="num">รายได้ขั้นต่ำ</th></tr></thead>
+            <tbody>${p.banks.map(b=>{const amt=Math.min(loanDefault,u.priceNet*b.maxLtvPct/100);const mm=monthlyPayment(amt,b.rate,Math.min(30,b.maxYears));return `<tr><td>${b.name}</td><td class="num">${b.rate.toFixed(2)}%</td><td class="num">${b.maxLtvPct}%</td><td class="num"><b>${fmt.baht(Math.round(mm))}</b></td><td class="num muted">${fmt.baht(requiredIncome(mm))}</td></tr>`;}).join('')}</tbody></table>
+          </div>
+          <p class="tiny" style="margin-top:14px;color:var(--muted-2)">* ธนาคารกำหนดภาระผ่อนรวมทุกสถาบันไม่เกิน 40% ของรายได้ต่อเดือน · อัตราจริงขึ้นกับผลอนุมัติรายบุคคล</p>
+        </div>
+      </div>
+
+      <!-- FLOOR PLAN -->
+      <div class="tabpane" id="t-plan">
+        <div class="grid g2" style="align-items:start">
+          <div>
+            <div class="ph floorplan ph-contain no-scrim reveal" style="border-radius:var(--r-lg)">
+              ${imgTag(imgKey.floorplan(u), `ผังห้องแบบ ${u.layoutCode} ${u.roomType}`)}
+              <span class="ph-label">Floor Plan ${u.layoutCode}</span>
+            </div>
+            <p class="tiny muted" style="margin-top:12px">ผังห้องแบบ ${u.layoutCode} · ${u.usableAreaSqm} ตร.ม. (รวมระเบียง ${u.balconyAreaSqm} ตร.ม.)</p>
+          </div>
+          <div class="card reveal" data-delay="70">
+            <h4>สัดส่วนพื้นที่ภายในห้อง</h4>
+            <div style="margin-top:18px">
+              ${(()=>{
+                const parts=[['ห้องนั่งเล่น/ครัว',.40],['ห้องนอน',.30],['ห้องน้ำ',.12],['ทางเดิน/ตู้เก็บของ',.08],['ระเบียง',u.balconyAreaSqm/u.usableAreaSqm]];
+                return parts.map(([k,r])=>{const a=(u.usableAreaSqm*r).toFixed(1);return `
+                <div style="margin-bottom:14px">
+                  <div class="row-between tiny" style="margin-bottom:6px"><span>${k}</span><span class="accent">${a} ตร.ม.</span></div>
+                  <div class="quota-bar"><i style="width:${Math.min(100,r*100/0.45*0.9)}%"></i></div>
+                </div>`;}).join('');
+              })()}
+            </div>
+            <hr class="divider" style="margin:20px 0">
+            <div class="kv"><span class="k">ตำแหน่งห้องบนชั้น</span><span class="v">${u.tags.includes('ห้องมุม')?'ห้องมุม (2 ด้านเปิด)':'ห้องกลางแถว'}</span></div>
+            <div class="kv"><span class="k">แสงแดดช่วง</span><span class="v">${['ตะวันออก','ตะวันออกเฉียงเหนือ'].includes(u.direction)?'เช้า (ร้อนน้อย)':['ตะวันตก','ตะวันตกเฉียงใต้'].includes(u.direction)?'บ่าย (ร้อนกว่า)':'ทั้งวันสม่ำเสมอ'}</span></div>
+            <div class="kv"><span class="k">จำนวนห้องต่อชั้น</span><span class="v">${p.unitsPerFloor} ห้อง</span></div>
+            <div class="kv"><span class="k">ลิฟต์โดยสาร</span><span class="v">${p.elevators} ตัว (${Math.round(p.totalUnits/p.elevators)} ห้อง/ลิฟต์)</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- PROJECT -->
+      <div class="tabpane" id="t-project">
+        <div class="speclist reveal">
+          ${[
+            ['ชื่อโครงการ', p.nameTh],['ผู้พัฒนา', p.developer],['ประเภทอาคาร', p.type],
+            ['สถานะโครงการ', p.status + (p.progressPct<100?` (${p.progressPct}%)`:'')],
+            ['กำหนดแล้วเสร็จ', p.quarterCompleted],['ขนาดที่ดิน', p.landAreaRai + ' ไร่'],
+            ['จำนวนอาคาร', p.buildings + ' อาคาร'],['จำนวนชั้น', p.floors + ' ชั้น'],
+            ['จำนวนยูนิตทั้งหมด', p.totalUnits + ' ยูนิต'],
+            ['อัตราส่วนที่จอดรถ', p.parkingRatioPct + '%'],
+            ['EV Charger', p.evCharger ? 'มี' : 'ไม่มี'],
+            ['นิติบุคคล', p.juristic],
+            ['ค่าส่วนกลาง', p.commonFeePerSqm + ' บ./ตร.ม./เดือน'],
+            ['เงินกองทุนแรกเข้า', p.sinkingFundPerSqm + ' บ./ตร.ม.'],
+            ['ผลตอบแทนค่าเช่าเฉลี่ย', p.rentalYieldEst + '% ต่อปี']
+          ].map(([k,v])=>`<div class="spec"><div class="k">${k}</div><div class="v" style="font-size:14px">${v}</div></div>`).join('')}
+        </div>
+
+        <div class="card reveal" style="margin-top:22px">
+          <div class="row-between" style="margin-bottom:12px"><h4 style="margin:0">โควตาต่างชาติ (Foreign Quota)</h4><span class="badge">${p.foreignQuotaSoldPct}% / ${p.foreignQuotaPct}%</span></div>
+          <div class="quota-bar"><i style="width:${p.foreignQuotaSoldPct/p.foreignQuotaPct*100}%"></i></div>
+          <p class="tiny" style="margin-top:12px">คงเหลือโควตาต่างชาติอีก ${(p.foreignQuotaPct-p.foreignQuotaSoldPct).toFixed(0)}% ของพื้นที่ขาย — ผู้ซื้อต่างชาติต้องมีหลักฐานการโอนเงินจากต่างประเทศ (FET/Credit Advice)</p>
+        </div>
+
+        <h3 style="margin:30px 0 16px">สิ่งอำนวยความสะดวก</h3>
+        <div class="fac reveal">${p.facilities.map(f=>`<div><span>✓</span>${f}</div>`).join('')}</div>
+      </div>
+
+      <!-- LOCATION -->
+      <div class="tabpane" id="t-loc">
+        <div class="ph mini-map no-scrim reveal">
+          ${imgTag(imgKey.map(p), `แผนที่ทำเล ${p.nameTh}`)}
+          <span class="ph-label">แผนที่ ${p.lat}, ${p.lng}</span>
+        </div>
+        <div class="card reveal" style="margin-top:20px">
+          <h4>ที่ตั้งโครงการ</h4>
+          <p style="margin-top:10px">${p.address} ${p.district} ${p.province} ${p.postcode}</p>
+          <hr class="divider" style="margin:20px 0">
+          <h4>ระบบขนส่งสาธารณะ</h4>
+          <div style="margin-top:12px">${p.transit.map(t=>`<div class="kv"><span class="k">${t.line} ${t.station}</span><span class="v">${t.distanceM} ม. · เดิน ${t.walkMin} นาที</span></div>`).join('')}</div>
+          <hr class="divider" style="margin:20px 0">
+          <h4>สถานที่ใกล้เคียง</h4>
+          <div style="margin-top:12px">${p.nearby.map(n=>`<div class="kv"><span class="k">${n.type} · ${n.name}</span><span class="v">${n.distanceKm} กม.</span></div>`).join('')}</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============ SIDEBAR ============ -->
+    <aside class="side">
+      <div class="card reveal">
+        <div class="glow glow-lime glow-sm" style="right:-110px;top:-130px"></div>
+        <div class="rel">
+          ${u.discount?`<div class="tiny" style="text-decoration:line-through;color:var(--muted-2)">${fmt.baht(u.priceList)}</div>`:''}
+          <div style="font-size:34px;font-weight:700;letter-spacing:-.03em;line-height:1.15">${fmt.baht(u.priceNet)}</div>
+          <div class="tiny muted">${fmt.baht(u.pricePerSqm)} / ตร.ม. · ${u.usableAreaSqm} ตร.ม.</div>
+
+          <hr class="divider" style="margin:20px 0">
+          <div class="kv"><span class="k">เงินจองวันนี้</span><span class="v accent">${fmt.baht(plan.booking)}</span></div>
+          <div class="kv"><span class="k">ผ่อนดาวน์/งวด</span><span class="v">${fmt.baht(plan.installments[0].amount)} × ${plan.installments.length}</span></div>
+          <div class="kv"><span class="k">ผ่อนธนาคารประมาณ</span><span class="v">${fmt.baht(Math.round(m))}/ด.</span></div>
+          <div class="kv"><span class="k">ค่าส่วนกลาง</span><span class="v">${fmt.baht(u.commonFeeMonthly)}/ด.</span></div>
+          <div class="kv"><span class="k">เตรียมไว้วันโอน</span><span class="v">${fmt.baht(costs.total)}</span></div>
+
+          <div style="margin-top:22px;display:grid;gap:10px">
+            ${taken
+              ? `<div class="badge badge-mute" style="justify-content:center;padding:14px">ห้องนี้ไม่ว่างแล้ว</div>
+                 <a class="btn btn-ghost btn-block" href="units.html?project=${p.id}">ดูห้องอื่นในโครงการนี้</a>`
+              : `<a class="btn btn-primary btn-block btn-lg" href="booking.html?unit=${encodeURIComponent(u.id)}">จองห้องนี้ · ${fmt.baht(plan.booking)}</a>
+                 <button class="btn btn-ghost btn-block" onclick="openAppt()">นัดชมห้อง / ขอข้อมูลเพิ่ม</button>`}
+          </div>
+          <p class="tiny center" style="margin-top:14px;color:var(--muted-2)">ห้องจะถูกล็อกให้ 7 วันหลังชำระเงินจอง</p>
+        </div>
+      </div>
+
+      <div class="card reveal" data-delay="80">
+        <div class="row" style="gap:13px">
+          <div class="avatar" style="width:46px;height:46px;border-radius:50%;background:var(--surface-2);border:1px solid var(--line);display:grid;place-items:center;font-weight:700;color:var(--accent)">${u.salesOwner.charAt(3)||'N'}</div>
+          <div><div style="font-weight:600">${u.salesOwner}</div><div class="tiny muted">ที่ปรึกษาการขายประจำห้องนี้</div></div>
+        </div>
+        <div class="row" style="gap:10px;margin-top:18px">
+          <a class="btn btn-ghost btn-sm" style="flex:1" href="tel:021234567">โทร</a>
+          <a class="btn btn-ghost btn-sm" style="flex:1" href="#">LINE</a>
+          <a class="btn btn-ghost btn-sm" style="flex:1" href="#">อีเมล</a>
+        </div>
+      </div>
+
+      <div class="card card-flat reveal" data-delay="120">
+        <h4 style="font-size:15px">⚠️ สิ่งที่ควรรู้ก่อนจอง</h4>
+        <ul style="margin:14px 0 0;padding-left:18px;font-size:13.5px;color:var(--muted);display:grid;gap:9px">
+          <li>เงินจองจะถูกนำไปหักจากราคาห้อง แต่ไม่คืนหากผู้ซื้อยกเลิกเอง</li>
+          <li>ต้องเซ็นสัญญาจะซื้อจะขายภายใน 7 วันนับจากวันจอง</li>
+          <li>ราคานี้ยังไม่รวมค่าใช้จ่ายวันโอนที่แสดงในแท็บ “ราคา &amp; ค่าใช้จ่าย”</li>
+          <li>พื้นที่จริงอาจคลาดเคลื่อนได้ไม่เกิน ±5% ตามสัญญามาตรฐาน สคบ.</li>
+        </ul>
+      </div>
+    </aside>
+  </div>
+
+  <!-- ============ SIMILAR ============ -->
+  <section style="margin-top:80px">
+    <div class="row-between" style="margin-bottom:26px"><h2 style="font-size:28px">ห้องอื่นที่คุณอาจสนใจ</h2><a class="btn btn-ghost btn-sm" href="units.html?project=${p.id}">ดูทั้งหมด →</a></div>
+    <div class="grid g4" id="similar"></div>
+  </section>`;
+
+  /* similar */
+  document.getElementById('similar').innerHTML = Store.units({projectId:p.id})
+    .filter(x=>x.id!==u.id && x.status==='Available')
+    .sort((a,b)=>Math.abs(a.priceNet-u.priceNet)-Math.abs(b.priceNet-u.priceNet))
+    .slice(0,4).map(unitCard).join('');
+
+  /* tabs */
+  document.querySelectorAll('.tabbar button').forEach(b=>b.onclick=()=>{
+    document.querySelectorAll('.tabbar button').forEach(x=>x.classList.remove('on'));
+    document.querySelectorAll('.tabpane').forEach(x=>x.classList.remove('on'));
+    b.classList.add('on'); document.getElementById('t-'+b.dataset.t).classList.add('on');
+    initReveal();
+  });
+
+  /* favourite */
+  const favBtn=document.getElementById('favBtn');
+  const syncFav=()=>{const on=Store.isFav(u.id);favBtn.innerHTML=on?'♥ บันทึกแล้ว':'♡ บันทึก';favBtn.style.color=on?'var(--accent)':'';};
+  window.fav=()=>{const on=Store.toggleFav(u.id);syncFav();toast(on?'บันทึกห้องนี้ไว้แล้ว':'นำออกจากรายการที่บันทึก');};
+  syncFav();
+
+  /* appointment modal */
+  window.openAppt=()=>openModal(`
+    <h3>นัดชมห้อง ${u.unitNo}</h3>
+    <p class="tiny" style="margin-top:8px">เจ้าหน้าที่จะติดต่อกลับเพื่อยืนยันภายใน 2 ชั่วโมงทำการ</p>
+    <form onsubmit="submitAppt(event)" style="display:grid;gap:16px;margin-top:22px">
+      <div class="field"><label>ชื่อ-นามสกุล <span class="req">*</span></label><input class="input" name="name" required></div>
+      <div class="grid g2" style="gap:16px">
+        <div class="field"><label>เบอร์โทร <span class="req">*</span></label><input class="input" name="phone" required placeholder="08x-xxx-xxxx"></div>
+        <div class="field"><label>อีเมล</label><input class="input" type="email" name="email"></div>
+      </div>
+      <div class="grid g2" style="gap:16px">
+        <div class="field"><label>วันที่สะดวก <span class="req">*</span></label><input class="input" type="date" name="date" required min="2026-08-12"></div>
+        <div class="field"><label>ช่วงเวลา</label>
+          <select class="select" name="slot"><option>10:00-11:00</option><option>11:00-12:00</option><option>14:00-15:00</option><option>15:00-16:00</option><option>16:00-17:00</option></select>
+        </div>
+      </div>
+      <div class="field"><label>รูปแบบ</label>
+        <select class="select" name="channel"><option>เข้าชมที่โครงการ</option><option>Video Call พาชมห้อง</option></select></div>
+      <div class="field"><label>ข้อความเพิ่มเติม</label><textarea class="textarea" name="note" placeholder="เช่น สนใจห้องชั้นสูงกว่านี้ / ขอดูห้องตัวอย่างแบบ 2 ห้องนอนด้วย"></textarea></div>
+      <label class="check"><input type="checkbox" required><span>ยินยอมให้เก็บและใช้ข้อมูลส่วนบุคคลเพื่อการติดต่อกลับ ตาม พ.ร.บ. คุ้มครองข้อมูลส่วนบุคคล (PDPA)</span></label>
+      <div class="row" style="gap:12px;margin-top:6px">
+        <button type="button" class="btn btn-ghost" style="flex:1" onclick="closeModal()">ยกเลิก</button>
+        <button type="submit" class="btn btn-primary" style="flex:1">ยืนยันนัดหมาย</button>
+      </div>
+    </form>`);
+  window.submitAppt=(e)=>{
+    e.preventDefault();
+    const f=new FormData(e.target);
+    Store.db.appointments.push({
+      id: uid('AP'), leadId:null, customerId:null, projectId:p.id, unitId:u.id,
+      name:f.get('name'), phone:f.get('phone'), email:f.get('email'),
+      date:f.get('date'), slot:f.get('slot'), channel:f.get('channel'), note:f.get('note'),
+      status:'Pending', owner:u.salesOwner
+    });
+    Store.save(); closeModal();
+    toast('บันทึกนัดหมายแล้ว เจ้าหน้าที่จะติดต่อกลับ');
+  };
+}
+renderFooter();
+initReveal();
+</script>
+</body>
+</html>

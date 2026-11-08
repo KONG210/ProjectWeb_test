@@ -1,0 +1,1143 @@
+<title>แบบ EER นิรา เรสซิเดนซ์</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bai+Jamjuree:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans+Thai:wght@400;500;600&display=swap">
+
+<style>
+:root{
+  --paper:#EFF1EC;
+  --sheet:#FBFBF8;
+  --sheet-2:#F4F5F1;
+  --ink:#1A2330;
+  --ink-2:#5B6773;
+  --ink-3:#8A949E;
+  --rule:#D1D6CE;
+  --rule-2:#E2E5DE;
+  --blue:#2C5F92;
+  --blue-soft:#E4EBF2;
+  --red:#A63D2A;
+  --red-soft:#F5E5E0;
+  --grid:rgba(26,35,48,.045);
+  --disp:'Bai Jamjuree','IBM Plex Sans Thai','Segoe UI',sans-serif;
+  --sans:'IBM Plex Sans Thai','Bai Jamjuree','Segoe UI',sans-serif;
+  --mono:'IBM Plex Mono','Cascadia Mono',ui-monospace,monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --paper:#111820;
+    --sheet:#18202A;
+    --sheet-2:#1D2631;
+    --ink:#E2E7E3;
+    --ink-2:#9AA6B2;
+    --ink-3:#77838F;
+    --rule:#2E3945;
+    --rule-2:#26303B;
+    --blue:#79ACDE;
+    --blue-soft:#1E3040;
+    --red:#E28268;
+    --red-soft:#3A241E;
+    --grid:rgba(226,231,227,.04);
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#111820;
+  --sheet:#18202A;
+  --sheet-2:#1D2631;
+  --ink:#E2E7E3;
+  --ink-2:#9AA6B2;
+  --ink-3:#77838F;
+  --rule:#2E3945;
+  --rule-2:#26303B;
+  --blue:#79ACDE;
+  --blue-soft:#1E3040;
+  --red:#E28268;
+  --red-soft:#3A241E;
+  --grid:rgba(226,231,227,.04);
+}
+
+*{box-sizing:border-box}
+body{
+  margin:0;
+  background:var(--paper);
+  background-image:
+    linear-gradient(var(--grid) 1px,transparent 1px),
+    linear-gradient(90deg,var(--grid) 1px,transparent 1px);
+  background-size:28px 28px;
+  color:var(--ink);
+  font-family:var(--sans);
+  font-size:16px;
+  line-height:1.72;
+  -webkit-font-smoothing:antialiased;
+}
+.wrap{max-width:1500px;margin:0 auto;padding:0 24px 96px}
+.col{max-width:820px}
+
+/* ---- masthead ---- */
+header.top{
+  border-bottom:2px solid var(--ink);
+  margin:0 0 44px;
+  padding:56px 0 20px;
+}
+.eyebrow{
+  font-family:var(--mono);font-size:11.5px;letter-spacing:.2em;text-transform:uppercase;
+  color:var(--blue);margin:0 0 14px;display:flex;gap:14px;flex-wrap:wrap;align-items:center;
+}
+.eyebrow span:not(:last-child)::after{content:'';display:inline-block;width:1px;height:11px;background:var(--rule);margin-left:14px;vertical-align:-1px}
+h1{
+  font-family:var(--disp);font-weight:700;font-size:clamp(34px,5.4vw,58px);
+  line-height:1.08;letter-spacing:-.015em;margin:0 0 16px;text-wrap:balance;
+}
+.lede{font-size:18px;color:var(--ink-2);max-width:64ch;margin:0}
+.meta{
+  display:flex;gap:0;flex-wrap:wrap;margin-top:28px;
+  border:1px solid var(--rule);background:var(--sheet);
+}
+.meta div{padding:12px 20px;border-right:1px solid var(--rule);flex:1 1 auto;min-width:150px}
+.meta div:last-child{border-right:none}
+.meta dt{font-family:var(--mono);font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-3);margin:0}
+.meta dd{margin:2px 0 0;font-family:var(--mono);font-size:14px;font-weight:500;font-variant-numeric:tabular-nums}
+
+/* ---- sections ---- */
+section{margin:0 0 68px}
+h2{
+  font-family:var(--disp);font-weight:600;font-size:27px;letter-spacing:-.01em;
+  margin:0 0 6px;display:flex;align-items:baseline;gap:14px;text-wrap:balance;
+}
+h2 .num{font-family:var(--mono);font-size:13px;font-weight:500;color:var(--blue);letter-spacing:.1em}
+.sub{color:var(--ink-2);margin:0 0 26px;max-width:66ch}
+h3{font-family:var(--disp);font-weight:600;font-size:19px;margin:34px 0 10px}
+p{margin:0 0 14px}
+a{color:var(--blue)}
+code{font-family:var(--mono);font-size:.88em;background:var(--sheet-2);border:1px solid var(--rule-2);padding:1px 5px;border-radius:2px}
+strong{font-weight:600}
+
+/* ---- drafting sheet ---- */
+figure.sheet{margin:0 0 40px;border:1px solid var(--rule);background:var(--sheet)}
+.tb{
+  display:flex;align-items:center;gap:16px;flex-wrap:wrap;
+  border-bottom:1px solid var(--rule);padding:11px 18px;background:var(--sheet-2);
+}
+.tb-no{
+  font-family:var(--mono);font-size:11px;font-weight:600;letter-spacing:.14em;
+  color:var(--sheet);background:var(--blue);padding:3px 9px;border-radius:2px;
+}
+.tb h3{font-family:var(--disp);font-weight:600;font-size:16px;margin:0;flex:1 1 auto}
+.tb-note{font-family:var(--mono);font-size:11px;color:var(--ink-3);letter-spacing:.06em}
+.canvas{overflow-x:auto;padding:16px 18px;background:var(--sheet)}
+.canvas svg{display:block;height:auto}
+figcaption{
+  border-top:1px solid var(--rule-2);padding:12px 18px;font-size:14.5px;color:var(--ink-2);
+}
+.scrollhint{font-family:var(--mono);font-size:10.5px;color:var(--ink-3);padding:0 18px 10px;letter-spacing:.06em}
+
+/* ---- svg diagram styling ---- */
+.dg text{font-family:var(--mono);fill:var(--ink);text-anchor:middle;dominant-baseline:auto}
+.dg .ent{fill:var(--sheet);stroke:var(--blue);stroke-width:1.8}
+.dg .ent-in{fill:none;stroke:var(--blue);stroke-width:1.3}
+.dg .rel{fill:var(--sheet);stroke:var(--blue);stroke-width:1.6}
+.dg .rel-in{fill:none;stroke:var(--blue);stroke-width:1.2}
+.dg .att{fill:var(--sheet);stroke:var(--ink-2);stroke-width:1.25}
+.dg .att-d{fill:var(--sheet);stroke:var(--ink-2);stroke-width:1.25;stroke-dasharray:6 4}
+.dg .ln{stroke:var(--ink-2);stroke-width:1.2;fill:none}
+.dg .lns{stroke:var(--blue);stroke-width:1.5;fill:none}
+.dg .eerl{stroke:var(--red);stroke-width:1.6;fill:none}
+.dg .eerf{fill:var(--sheet);stroke:var(--red);stroke-width:1.8}
+.dg .te{font-size:13px;font-weight:600;letter-spacing:.03em}
+.dg .tr{font-size:11.5px;font-weight:500}
+.dg .ta{font-size:11px;fill:var(--ink-2)}
+.dg .tc{font-size:12.5px;font-weight:600;fill:var(--blue)}
+.dg .tx{font-size:13px;font-weight:600;fill:var(--red)}
+.dg .tnote{font-size:11px;fill:var(--red);font-family:var(--sans)}
+.dg .tsheet{font-size:10px;fill:var(--ink-3);letter-spacing:.1em}
+.dg .k{text-decoration:underline;text-underline-offset:2.5px}
+.dg .pk{text-decoration:underline;text-decoration-style:dashed;text-underline-offset:2.5px}
+.dg .ghost{fill:var(--sheet-2);stroke:var(--ink-3);stroke-width:1.4;stroke-dasharray:6 4}
+
+/* ---- legend grid ---- */
+.legend{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:1px;background:var(--rule);border:1px solid var(--rule)}
+.lg{background:var(--sheet);padding:14px 16px 16px}
+.lg svg{display:block;width:100%;height:auto;max-width:210px;margin:0 auto 6px}
+.lg b{display:block;font-family:var(--mono);font-size:11.5px;font-weight:600;letter-spacing:.04em;color:var(--ink)}
+.lg span{display:block;font-size:13.5px;color:var(--ink-2);line-height:1.5}
+
+/* ---- tables ---- */
+.tblwrap{overflow-x:auto;border:1px solid var(--rule);background:var(--sheet)}
+table{border-collapse:collapse;width:100%;font-size:14.5px;min-width:640px}
+th,td{text-align:left;padding:9px 14px;border-bottom:1px solid var(--rule-2);vertical-align:top}
+thead th{
+  font-family:var(--mono);font-size:10.5px;letter-spacing:.13em;text-transform:uppercase;
+  color:var(--ink-3);background:var(--sheet-2);border-bottom:1px solid var(--rule);font-weight:600;
+}
+tbody tr:last-child td{border-bottom:none}
+td.m,th.m{font-family:var(--mono);font-size:13px;white-space:nowrap}
+.pill{
+  display:inline-block;font-family:var(--mono);font-size:10.5px;font-weight:600;letter-spacing:.06em;
+  padding:2px 7px;border-radius:2px;background:var(--blue-soft);color:var(--blue);white-space:nowrap;
+}
+.pill.e{background:var(--red-soft);color:var(--red)}
+
+/* ---- dictionary ---- */
+.dict{display:grid;grid-template-columns:repeat(auto-fill,minmax(330px,1fr));gap:1px;background:var(--rule);border:1px solid var(--rule)}
+.card{background:var(--sheet);padding:14px 16px 16px}
+.card h4{font-family:var(--mono);font-size:13px;font-weight:600;letter-spacing:.05em;margin:0 0 2px;color:var(--blue)}
+.card .cap{font-size:12.5px;color:var(--ink-3);margin:0 0 8px}
+.card ul{margin:0;padding:0;list-style:none;font-family:var(--mono);font-size:12.3px;line-height:1.85;color:var(--ink-2)}
+.card li u{text-decoration:underline;text-underline-offset:2.5px;color:var(--ink);font-weight:500}
+.card li u.d{text-decoration-style:dashed}
+.card li i{font-style:normal;color:var(--red)}
+
+/* ---- callout ---- */
+.note{
+  border-left:3px solid var(--red);background:var(--sheet);padding:14px 18px;margin:0 0 18px;
+  font-size:15px;color:var(--ink-2);
+}
+.note b{color:var(--ink)}
+
+footer{border-top:1px solid var(--rule);padding-top:20px;color:var(--ink-3);font-size:13.5px}
+
+@media (max-width:640px){
+  .wrap{padding:0 16px 64px}
+  .meta div{border-right:none;border-bottom:1px solid var(--rule)}
+}
+:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+
+<div class="wrap">
+
+<header class="top">
+  <p class="eyebrow"><span>EER Model</span><span>Chen Notation</span><span>NIRA Residence</span></p>
+  <h1>แบบ EER เว็บขายคอนโด</h1>
+  <p class="lede">แบบจำลองข้อมูลระดับแนวคิดของระบบขายคอนโดมิเนียม เขียนด้วยสัญกรณ์ Chen พร้อมส่วนขยาย EER — การสืบทอด (specialization), เอนทิตีอ่อน, ความสัมพันธ์สามทาง, ความสัมพันธ์เวียนเกิด และประเภทรวม (category)</p>
+  <dl class="meta">
+    <div><dt>เอนทิตี</dt><dd>24</dd></div>
+    <div><dt>ความสัมพันธ์</dt><dd>26</dd></div>
+    <div><dt>เอนทิตีอ่อน</dt><dd>3</dd></div>
+    <div><dt>Specialization</dt><dd>2 ระดับ</dd></div>
+    <div><dt>ตารางหลังแปลง</dt><dd>31</dd></div>
+  </dl>
+</header>
+
+<!-- ============ 1. LEGEND ============ -->
+<section>
+  <h2><span class="num">01</span>สัญลักษณ์ที่ใช้</h2>
+  <p class="sub">สีน้ำเงินคือสัญลักษณ์ ER มาตรฐานของ Chen — สีแดงคือส่วนขยาย EER ที่ ER ธรรมดาเขียนไม่ได้</p>
+
+  <div class="legend">
+
+    <div class="lg">
+      <svg class="dg" viewBox="0 0 210 96" role="img" aria-label="สี่เหลี่ยมผืนผ้าแทนเอนทิตี">
+        <rect class="ent" x="35" y="26" width="140" height="44" rx="2"/>
+        <text class="te" x="105" y="53">PROJECT</text>
+      </svg>
+      <b>Entity</b><span>เอนทิตีปกติ — มีคีย์หลักของตัวเอง</span>
+    </div>
+
+    <div class="lg">
+      <svg class="dg" viewBox="0 0 210 96" role="img" aria-label="สี่เหลี่ยมสองชั้นแทนเอนทิตีอ่อน">
+        <rect class="ent" x="29" y="20" width="152" height="56" rx="2"/>
+        <rect class="ent-in" x="35" y="26" width="140" height="44" rx="2"/>
+        <text class="te" x="105" y="53">INSTALLMENT</text>
+      </svg>
+      <b>Weak entity</b><span>ไม่มีคีย์ของตัวเอง ต้องพึ่งเอนทิตีแม่</span>
+    </div>
+
+    <div class="lg">
+      <svg class="dg" viewBox="0 0 210 96" role="img" aria-label="สี่เหลี่ยมขนมเปียกปูนแทนความสัมพันธ์">
+        <polygon class="rel" points="41,48 105,20 169,48 105,76"/>
+        <text class="tr" x="105" y="52">CONTAINS</text>
+      </svg>
+      <b>Relationship</b><span>ความสัมพันธ์ระหว่างเอนทิตี</span>
+    </div>
+
+    <div class="lg">
+      <svg class="dg" viewBox="0 0 210 96" role="img" aria-label="ขนมเปียกปูนสองชั้นแทนความสัมพันธ์บ่งชี้">
+        <polygon class="rel" points="35,48 105,16 175,48 105,80"/>
+        <polygon class="rel-in" points="48,48 105,26 162,48 105,70"/>
+        <text class="tr" x="105" y="52">HAS_INST</text>
+      </svg>
+      <b>Identifying rel.</b><span>ความสัมพันธ์ที่ให้คีย์แก่เอนทิตีอ่อน</span>
+    </div>
+
+    <div class="lg">
+      <svg class="dg" viewBox="0 0 210 96" role="img" aria-label="วงรีแทนแอตทริบิวต์">
+        <ellipse class="att" cx="105" cy="48" rx="60" ry="21"/>
+        <text class="ta" x="105" y="52">status</text>
+      </svg>
+      <b>Attribute</b><span>คุณสมบัติทั่วไป</span>
+    </div>
+
+    <div class="lg">
+      <svg class="dg" viewBox="0 0 210 96" role="img" aria-label="วงรีที่ข้อความขีดเส้นใต้แทนคีย์หลัก">
+        <ellipse class="att" cx="105" cy="48" rx="60" ry="21"/>
+        <text class="ta k" x="105" y="52">project_id</text>
+      </svg>
+      <b>Key attribute</b><span>ขีดเส้นใต้ทึบ = คีย์หลัก</span>
+    </div>
+
+    <div class="lg">
+      <svg class="dg" viewBox="0 0 210 96" role="img" aria-label="วงรีที่ข้อความขีดเส้นใต้ประแทนคีย์บางส่วน">
+        <ellipse class="att" cx="105" cy="48" rx="60" ry="21"/>
+        <text class="ta pk" x="105" y="52">inst_no</text>
+      </svg>
+      <b>Partial key</b><span>ขีดเส้นใต้ประ = คีย์ของเอนทิตีอ่อน</span>
+    </div>
+
+    <div class="lg">
+      <svg class="dg" viewBox="0 0 210 96" role="img" aria-label="วงรีสองชั้นแทนแอตทริบิวต์หลายค่า">
+        <ellipse class="att" cx="105" cy="48" rx="66" ry="27"/>
+        <ellipse class="att" cx="105" cy="48" rx="60" ry="21"/>
+        <text class="ta" x="105" y="52">phone</text>
+      </svg>
+      <b>Multivalued</b><span>เก็บได้หลายค่าต่อ 1 แถว</span>
+    </div>
+
+    <div class="lg">
+      <svg class="dg" viewBox="0 0 210 96" role="img" aria-label="วงรีเส้นประแทนแอตทริบิวต์คำนวณ">
+        <ellipse class="att-d" cx="105" cy="48" rx="60" ry="21"/>
+        <text class="ta" x="105" y="52">price_net</text>
+      </svg>
+      <b>Derived</b><span>คำนวณจากค่าอื่น ไม่ต้องเก็บจริง</span>
+    </div>
+
+    <div class="lg">
+      <svg class="dg" viewBox="0 0 210 96" role="img" aria-label="วงรีแม่ที่มีวงรีลูกสองวงแทนแอตทริบิวต์ประกอบ">
+        <line class="ln" x1="105" y1="41" x2="46" y2="66"/>
+        <line class="ln" x1="105" y1="41" x2="164" y2="66"/>
+        <ellipse class="att" cx="105" cy="24" rx="48" ry="17"/>
+        <text class="ta" x="105" y="28">name</text>
+        <ellipse class="att" cx="46" cy="79" rx="42" ry="15"/>
+        <text class="ta" x="46" y="83">first</text>
+        <ellipse class="att" cx="164" cy="79" rx="42" ry="15"/>
+        <text class="ta" x="164" y="83">last</text>
+      </svg>
+      <b>Composite</b><span>แตกย่อยได้อีกชั้น</span>
+    </div>
+
+    <div class="lg">
+      <svg class="dg" viewBox="0 0 210 96" role="img" aria-label="เส้นเชื่อมที่มีเลขหนึ่งและเอ็นกำกับ">
+        <line class="lns" x1="54" y1="48" x2="78" y2="48"/>
+        <line class="lns" x1="132" y1="48" x2="156" y2="48"/>
+        <rect class="ent" x="6" y="34" width="48" height="28" rx="2"/>
+        <polygon class="rel" points="78,48 105,30 132,48 105,66"/>
+        <rect class="ent" x="156" y="34" width="48" height="28" rx="2"/>
+        <text class="tc" x="66" y="40">1</text>
+        <text class="tc" x="144" y="40">N</text>
+      </svg>
+      <b>Cardinality</b><span>1:1 · 1:N · M:N กำกับบนเส้น</span>
+    </div>
+
+    <div class="lg">
+      <svg class="dg" viewBox="0 0 210 96" role="img" aria-label="เส้นคู่แทนการมีส่วนร่วมแบบสมบูรณ์">
+        <line class="lns" x1="54" y1="48" x2="78" y2="48"/>
+        <line class="lns" x1="132" y1="45" x2="156" y2="45"/>
+        <line class="lns" x1="132" y1="51" x2="156" y2="51"/>
+        <rect class="ent" x="6" y="34" width="48" height="28" rx="2"/>
+        <polygon class="rel" points="78,48 105,30 132,48 105,66"/>
+        <rect class="ent" x="156" y="34" width="48" height="28" rx="2"/>
+        <text class="tc" x="176" y="26">total</text>
+      </svg>
+      <b>Total participation</b><span>เส้นคู่ = ทุกแถวต้องมีคู่เสมอ</span>
+    </div>
+
+    <div class="lg">
+      <svg class="dg" viewBox="0 0 210 96" role="img" aria-label="วงกลมดีเชื่อมซูเปอร์คลาสกับซับคลาสสองตัว">
+        <line class="eerl" x1="102" y1="20" x2="102" y2="34"/>
+        <line class="eerl" x1="108" y1="20" x2="108" y2="34"/>
+        <line class="eerl" x1="105" y1="60" x2="105" y2="68"/>
+        <line class="eerl" x1="40" y1="68" x2="170" y2="68"/>
+        <line class="eerl" x1="40" y1="68" x2="40" y2="80"/>
+        <line class="eerl" x1="170" y1="68" x2="170" y2="80"/>
+        <rect class="eerf" x="72" y="4" width="66" height="16" rx="2"/>
+        <circle class="eerf" cx="105" cy="47" r="13"/>
+        <text class="tx" x="105" y="52">d</text>
+        <rect class="eerf" x="8" y="80" width="64" height="16" rx="2"/>
+        <rect class="eerf" x="138" y="80" width="64" height="16" rx="2"/>
+        <text class="tx" x="40" y="79" transform="rotate(-90 40 79)">⊂</text>
+        <text class="tx" x="170" y="79" transform="rotate(-90 170 79)">⊂</text>
+      </svg>
+      <b>Specialization</b><span>ซูเปอร์คลาส → ซับคลาส (⊂ ชี้ขึ้นหาแม่)</span>
+    </div>
+
+    <div class="lg">
+      <svg class="dg" viewBox="0 0 210 96" role="img" aria-label="วงกลมดีและวงกลมโอ">
+        <circle class="eerf" cx="62" cy="42" r="20"/>
+        <text class="tx" x="62" y="47">d</text>
+        <circle class="eerf" cx="148" cy="42" r="20"/>
+        <text class="tx" x="148" y="47">o</text>
+        <text class="ta" x="62" y="82">disjoint</text>
+        <text class="ta" x="148" y="82">overlap</text>
+      </svg>
+      <b>d / o</b><span>อยู่ได้ซับคลาสเดียว / อยู่ได้หลายซับคลาส</span>
+    </div>
+
+    <div class="lg">
+      <svg class="dg" viewBox="0 0 210 96" role="img" aria-label="วงกลมยูเนียนรวมสามซูเปอร์คลาส">
+        <line class="eerl" x1="52" y1="18" x2="72" y2="40"/>
+        <line class="eerl" x1="52" y1="48" x2="72" y2="48"/>
+        <line class="eerl" x1="52" y1="78" x2="72" y2="56"/>
+        <line class="eerl" x1="112" y1="48" x2="150" y2="48"/>
+        <rect class="eerf" x="6" y="10" width="46" height="16" rx="2"/>
+        <rect class="eerf" x="6" y="40" width="46" height="16" rx="2"/>
+        <rect class="eerf" x="6" y="70" width="46" height="16" rx="2"/>
+        <circle class="eerf" cx="92" cy="48" r="20"/>
+        <text class="tx" x="92" y="54">∪</text>
+        <rect class="eerf" x="150" y="34" width="54" height="28" rx="2"/>
+        <text class="tx" x="131" y="53" transform="rotate(180 131 48)">⊂</text>
+      </svg>
+      <b>Category (union)</b><span>ซับคลาสที่รับสมาชิกจากหลายซูเปอร์คลาส</span>
+    </div>
+
+  </div>
+</section>
+
+<!-- ============ 2. OVERVIEW MAP ============ -->
+<section>
+  <h2><span class="num">02</span>ภาพรวม 3 ระบบย่อย</h2>
+  <p class="sub">แบบเต็มมี 24 เอนทิตี เขียนรวมแผ่นเดียวจะอ่านไม่ออก จึงแยกเป็น 3 ผัง ผังนี้บอกว่าแต่ละผังเชื่อมกันตรงไหน</p>
+
+  <figure class="sheet">
+    <div class="tb"><span class="tb-no">ผัง 00</span><h3>แผนที่ระบบ</h3><span class="tb-note">ไม่ใช่ Chen · เป็นผังนำทาง</span></div>
+    <div class="canvas">
+      <svg class="dg" width="1240" height="470" viewBox="0 0 1240 470" role="img" aria-label="ผังนำทางแสดงระบบย่อยสามระบบ คือ สินค้า ผู้ใช้ และธุรกรรม เชื่อมกันด้วยเอนทิตี UNIT CUSTOMER และ STAFF">
+
+        <rect x="20" y="60" width="360" height="290" rx="4" fill="var(--sheet-2)" stroke="var(--rule)" stroke-width="1.4"/>
+        <text class="tsheet" x="200" y="86">ผัง 01</text>
+        <text class="te" x="200" y="112">สินค้า · PRODUCT</text>
+        <text class="ta" x="200" y="150">DEVELOPER · PROJECT</text>
+        <text class="ta" x="200" y="174">BUILDING · UNIT_TYPE</text>
+        <text class="ta" x="200" y="198">FACILITY · TRANSIT_STATION</text>
+        <text class="ta" x="200" y="222">NEARBY_PLACE · MEDIA</text>
+        <rect class="ent" x="120" y="262" width="160" height="46" rx="2"/>
+        <text class="te" x="200" y="291">UNIT</text>
+
+        <rect x="440" y="60" width="360" height="290" rx="4" fill="var(--sheet-2)" stroke="var(--rule)" stroke-width="1.4"/>
+        <text class="tsheet" x="620" y="86">ผัง 02</text>
+        <text class="te" x="620" y="112">ผู้ใช้งาน · PEOPLE</text>
+        <text class="ta" x="620" y="150">PERSON</text>
+        <text class="ta" x="620" y="174">THAI_CUSTOMER</text>
+        <text class="ta" x="620" y="198">FOREIGN_CUSTOMER</text>
+        <text class="ta" x="620" y="222">USER_ACCOUNT · APPOINTMENT</text>
+        <rect class="ent" x="460" y="262" width="150" height="46" rx="2"/>
+        <text class="te" x="535" y="291">CUSTOMER</text>
+        <rect class="ent" x="630" y="262" width="150" height="46" rx="2"/>
+        <text class="te" x="705" y="291">STAFF</text>
+
+        <rect x="860" y="60" width="360" height="290" rx="4" fill="var(--sheet-2)" stroke="var(--rule)" stroke-width="1.4"/>
+        <text class="tsheet" x="1040" y="86">ผัง 03</text>
+        <text class="te" x="1040" y="112">ธุรกรรม · SALES</text>
+        <text class="ta" x="1040" y="150">LEAD · BOOKING</text>
+        <text class="ta" x="1040" y="174">INSTALLMENT · PAYMENT</text>
+        <text class="ta" x="1040" y="198">DOCUMENT · PROMOTION</text>
+        <text class="ta" x="1040" y="222">LOAN · BANK</text>
+        <rect class="ent" x="960" y="262" width="160" height="46" rx="2"/>
+        <text class="te" x="1040" y="291">BOOKING</text>
+
+        <line class="lns" x1="280" y1="285" x2="960" y2="285"/>
+        <text class="tr" x="620" y="330">FOR_UNIT · MAKES · HANDLES</text>
+        <text class="ta" x="620" y="352">3 ความสัมพันธ์ที่พาดข้ามผัง</text>
+        <line class="lns" x1="535" y1="308" x2="535" y2="285"/>
+        <line class="lns" x1="705" y1="308" x2="705" y2="285"/>
+
+        <text class="ta" x="620" y="410">UNIT ถูกจอง · CUSTOMER เป็นผู้จอง · STAFF เป็นผู้ดูแลการจอง</text>
+      </svg>
+    </div>
+    <figcaption>เอนทิตี 3 ตัวที่ปรากฏในหลายผัง — <code>UNIT</code>, <code>CUSTOMER</code>, <code>STAFF</code> — คือจุดต่อระหว่างระบบย่อย ในผังจริงจะวาดครั้งเดียว</figcaption>
+  </figure>
+</section>
+
+<!-- ============ 3. SHEET 01 PRODUCT ============ -->
+<section>
+  <h2><span class="num">03</span>ผัง 01 — โครงการและห้องชุด</h2>
+  <p class="sub">ฝั่งสินค้า จุดสำคัญคือ <b>UNIT_TYPE</b> (แบบห้อง) กับ <b>UNIT</b> (ห้องจริงรายห้อง) ต้องแยกกัน ไม่งั้นข้อมูลผังพื้นและพื้นที่จะซ้ำทุกห้อง</p>
+
+  <figure class="sheet">
+    <div class="tb"><span class="tb-no">ผัง 01</span><h3>PRODUCT — โครงการ · อาคาร · ห้องชุด</h3><span class="tb-note">Chen เต็มรูปแบบ</span></div>
+    <div class="canvas">
+      <svg class="dg" width="1660" height="1090" viewBox="0 0 1660 1090" role="img" aria-label="ผัง EER ฝั่งสินค้า แสดง DEVELOPER PROJECT BUILDING UNIT_TYPE UNIT FACILITY TRANSIT_STATION และเอนทิตีอ่อน NEARBY_PLACE">
+
+        <!-- lines: developer - develops - project -->
+        <line class="lns" x1="230" y1="210" x2="366" y2="210"/>
+        <line class="lns" x1="494" y1="210" x2="630" y2="210"/>
+        <!-- project - near - transit -->
+        <line class="lns" x1="770" y1="210" x2="1266" y2="210"/>
+        <line class="lns" x1="1330" y1="237" x2="1330" y2="327"/>
+        <!-- project - provides - facility -->
+        <line class="lns" x1="650" y1="233" x2="358" y2="326"/>
+        <line class="lns" x1="302" y1="374" x2="200" y2="479"/>
+        <!-- project - has_nearby - nearby_place (total, double) -->
+        <line class="lns" x1="690" y1="233" x2="520" y2="443"/>
+        <line class="lns" x1="517" y1="497" x2="517" y2="611"/>
+        <line class="lns" x1="523" y1="497" x2="523" y2="611"/>
+        <!-- project - has_bldg - building (total, double) -->
+        <line class="lns" x1="740" y1="233" x2="877" y2="324"/>
+        <line class="lns" x1="877" y1="377" x2="877" y2="477"/>
+        <line class="lns" x1="883" y1="377" x2="883" y2="477"/>
+        <!-- project - defines - unit_type -->
+        <line class="lns" x1="765" y1="233" x2="1268" y2="494"/>
+        <line class="lns" x1="1330" y1="527" x2="1330" y2="617"/>
+        <!-- building - contains - unit (total, double) -->
+        <line class="lns" x1="880" y1="523" x2="880" y2="673"/>
+        <line class="lns" x1="877" y1="727" x2="877" y2="867"/>
+        <line class="lns" x1="883" y1="727" x2="883" y2="867"/>
+        <!-- unit_type - is_type - unit -->
+        <line class="lns" x1="1310" y1="663" x2="1184" y2="762"/>
+        <line class="lns" x1="1056" y1="778" x2="950" y2="872"/>
+
+        <!-- attribute leaders : developer -->
+        <line class="ln" x1="160" y1="187" x2="160" y2="99"/>
+        <line class="ln" x1="120" y1="233" x2="102" y2="311"/>
+        <!-- project attrs -->
+        <line class="ln" x1="640" y1="187" x2="524" y2="139"/>
+        <line class="ln" x1="668" y1="187" x2="642" y2="89"/>
+        <line class="ln" x1="700" y1="187" x2="778" y2="79"/>
+        <line class="ln" x1="730" y1="187" x2="918" y2="109"/>
+        <line class="ln" x1="758" y1="187" x2="1058" y2="159"/>
+        <!-- near attrs -->
+        <line class="ln" x1="1322" y1="185" x2="1256" y2="119"/>
+        <line class="ln" x1="1345" y1="188" x2="1414" y2="99"/>
+        <!-- transit attrs -->
+        <line class="ln" x1="1400" y1="340" x2="1506" y2="306"/>
+        <line class="ln" x1="1400" y1="362" x2="1506" y2="394"/>
+        <!-- facility attrs -->
+        <line class="ln" x1="130" y1="523" x2="82" y2="601"/>
+        <line class="ln" x1="192" y1="523" x2="248" y2="621"/>
+        <!-- nearby attrs -->
+        <line class="ln" x1="480" y1="669" x2="412" y2="761"/>
+        <line class="ln" x1="520" y1="669" x2="558" y2="771"/>
+        <line class="ln" x1="558" y1="666" x2="688" y2="741"/>
+        <!-- building attrs -->
+        <line class="ln" x1="950" y1="488" x2="1036" y2="470"/>
+        <line class="ln" x1="950" y1="514" x2="1036" y2="546"/>
+        <!-- unit_type attrs -->
+        <line class="ln" x1="1400" y1="626" x2="1486" y2="596"/>
+        <line class="ln" x1="1400" y1="654" x2="1486" y2="686"/>
+        <!-- unit attrs -->
+        <line class="ln" x1="820" y1="913" x2="552" y2="1002"/>
+        <line class="ln" x1="838" y1="913" x2="676" y2="1002"/>
+        <line class="ln" x1="858" y1="913" x2="800" y2="1002"/>
+        <line class="ln" x1="890" y1="913" x2="928" y2="1002"/>
+        <line class="ln" x1="908" y1="913" x2="1062" y2="1002"/>
+        <line class="ln" x1="925" y1="913" x2="1196" y2="1002"/>
+        <line class="ln" x1="940" y1="911" x2="1330" y2="996"/>
+
+        <!-- ENTITIES -->
+        <rect class="ent" x="90" y="187" width="140" height="46" rx="2"/><text class="te" x="160" y="216">DEVELOPER</text>
+        <rect class="ent" x="630" y="187" width="140" height="46" rx="2"/><text class="te" x="700" y="216">PROJECT</text>
+        <rect class="ent" x="1260" y="327" width="140" height="46" rx="2"/><text class="te" x="1330" y="356">TRANSIT_STN</text>
+        <rect class="ent" x="90" y="477" width="140" height="46" rx="2"/><text class="te" x="160" y="506">FACILITY</text>
+        <rect class="ent" x="810" y="477" width="140" height="46" rx="2"/><text class="te" x="880" y="506">BUILDING</text>
+        <rect class="ent" x="1260" y="617" width="140" height="46" rx="2"/><text class="te" x="1330" y="646">UNIT_TYPE</text>
+        <rect class="ent" x="810" y="867" width="140" height="46" rx="2"/><text class="te" x="880" y="896">UNIT</text>
+        <!-- weak -->
+        <rect class="ent" x="444" y="611" width="152" height="58" rx="2"/>
+        <rect class="ent-in" x="450" y="617" width="140" height="46" rx="2"/>
+        <text class="te" x="520" y="646">NEARBY</text>
+
+        <!-- RELATIONSHIPS -->
+        <polygon class="rel" points="366,210 430,183 494,210 430,237"/><text class="tr" x="430" y="214">DEVELOPS</text>
+        <polygon class="rel" points="1266,210 1330,183 1394,210 1330,237"/><text class="tr" x="1330" y="214">NEAR</text>
+        <polygon class="rel" points="266,350 330,323 394,350 330,377"/><text class="tr" x="330" y="354">PROVIDES</text>
+        <polygon class="rel" points="816,350 880,323 944,350 880,377"/><text class="tr" x="880" y="354">HAS_BLDG</text>
+        <polygon class="rel" points="1266,500 1330,473 1394,500 1330,527"/><text class="tr" x="1330" y="504">DEFINES</text>
+        <polygon class="rel" points="816,700 880,673 944,700 880,727"/><text class="tr" x="880" y="704">CONTAINS</text>
+        <polygon class="rel" points="1056,770 1120,743 1184,770 1120,797"/><text class="tr" x="1120" y="774">IS_TYPE</text>
+        <!-- identifying (double diamond) -->
+        <polygon class="rel" points="450,470 520,437 590,470 520,503"/>
+        <polygon class="rel-in" points="463,470 520,447 577,470 520,493"/>
+        <text class="tr" x="520" y="474">HAS_NEAR</text>
+
+        <!-- ATTRIBUTES -->
+        <ellipse class="att" cx="160" cy="80" rx="56" ry="19"/><text class="ta k" x="160" y="84">developer_id</text>
+        <ellipse class="att" cx="100" cy="330" rx="56" ry="19"/><text class="ta" x="100" y="334">name</text>
+
+        <ellipse class="att" cx="520" cy="120" rx="56" ry="19"/><text class="ta k" x="520" y="124">project_id</text>
+        <ellipse class="att" cx="640" cy="70" rx="56" ry="19"/><text class="ta" x="640" y="74">code</text>
+        <ellipse class="att" cx="780" cy="60" rx="56" ry="19"/><text class="ta" x="780" y="64">name_th</text>
+        <ellipse class="att" cx="920" cy="90" rx="56" ry="19"/><text class="ta" x="920" y="94">status</text>
+        <ellipse class="att-d" cx="1060" cy="140" rx="56" ry="19"/><text class="ta" x="1060" y="144">total_units</text>
+
+        <ellipse class="att" cx="1250" cy="100" rx="56" ry="19"/><text class="ta" x="1250" y="104">distance_m</text>
+        <ellipse class="att" cx="1420" cy="80" rx="56" ry="19"/><text class="ta" x="1420" y="84">walk_min</text>
+
+        <ellipse class="att" cx="1562" cy="300" rx="56" ry="19"/><text class="ta k" x="1562" y="304">station_id</text>
+        <ellipse class="att" cx="1562" cy="400" rx="56" ry="19"/><text class="ta" x="1562" y="404">line_name</text>
+
+        <ellipse class="att" cx="82" cy="620" rx="56" ry="19"/><text class="ta k" x="82" y="624">facility_id</text>
+        <ellipse class="att" cx="250" cy="640" rx="56" ry="19"/><text class="ta" x="250" y="644">name</text>
+
+        <ellipse class="att" cx="400" cy="780" rx="56" ry="19"/><text class="ta pk" x="400" y="784">place_name</text>
+        <ellipse class="att" cx="560" cy="790" rx="56" ry="19"/><text class="ta" x="560" y="794">distance_km</text>
+        <ellipse class="att" cx="700" cy="760" rx="56" ry="19"/><text class="ta" x="700" y="764">place_type</text>
+
+        <ellipse class="att" cx="1092" cy="460" rx="56" ry="19"/><text class="ta k" x="1092" y="464">building_id</text>
+        <ellipse class="att" cx="1092" cy="556" rx="56" ry="19"/><text class="ta" x="1092" y="560">floors</text>
+
+        <ellipse class="att" cx="1542" cy="588" rx="56" ry="19"/><text class="ta k" x="1542" y="592">type_id</text>
+        <ellipse class="att" cx="1542" cy="696" rx="56" ry="19"/><text class="ta" x="1542" y="700">area_sqm</text>
+
+        <ellipse class="att" cx="540" cy="1020" rx="56" ry="19"/><text class="ta k" x="540" y="1024">unit_id</text>
+        <ellipse class="att" cx="670" cy="1020" rx="56" ry="19"/><text class="ta" x="670" y="1024">unit_no</text>
+        <ellipse class="att" cx="800" cy="1020" rx="56" ry="19"/><text class="ta" x="800" y="1024">floor</text>
+        <ellipse class="att" cx="930" cy="1020" rx="56" ry="19"/><text class="ta" x="930" y="1024">price_list</text>
+        <ellipse class="att-d" cx="1075" cy="1020" rx="56" ry="19"/><text class="ta" x="1075" y="1024">price_net</text>
+        <ellipse class="att" cx="1205" cy="1020" rx="56" ry="19"/><text class="ta" x="1205" y="1024">status</text>
+        <ellipse class="att" cx="1345" cy="1015" rx="62" ry="25"/>
+        <ellipse class="att" cx="1345" cy="1015" rx="56" ry="19"/><text class="ta" x="1345" y="1019">tag</text>
+
+        <!-- CARDINALITY -->
+        <text class="tc" x="278" y="200">1</text>
+        <text class="tc" x="562" y="200">N</text>
+        <text class="tc" x="818" y="200">M</text>
+        <text class="tc" x="1222" y="200">N</text>
+        <text class="tc" x="614" y="264">M</text>
+        <text class="tc" x="252" y="418">N</text>
+        <text class="tc" x="664" y="274">1</text>
+        <text class="tc" x="500" y="560">N</text>
+        <text class="tc" x="778" y="272">1</text>
+        <text class="tc" x="858" y="432">N</text>
+        <text class="tc" x="852" y="272">1</text>
+        <text class="tc" x="1272" y="562">N</text>
+        <text class="tc" x="858" y="590">1</text>
+        <text class="tc" x="858" y="812">N</text>
+        <text class="tc" x="1268" y="706">1</text>
+        <text class="tc" x="1002" y="838">N</text>
+      </svg>
+    </div>
+    <p class="scrollhint">← เลื่อนแนวนอนเพื่อดูผังทั้งแผ่น</p>
+    <figcaption><b>อ่านอย่างไร:</b> เส้นคู่จาก <code>HAS_BLDG</code> ไป <code>BUILDING</code> แปลว่าอาคารทุกหลังต้องสังกัดโครงการเสมอ (total participation) · <code>NEARBY</code> เป็นเอนทิตีอ่อนเพราะ "สวนเบญจสิริ ห่าง 1.3 กม." มีความหมายเฉพาะเมื่อผูกกับโครงการหนึ่ง ๆ · <code>price_net</code> และ <code>total_units</code> วาดเส้นประเพราะคำนวณได้จากค่าอื่น</figcaption>
+  </figure>
+
+  <div class="note"><b>จุดที่มักทำผิด:</b> เอาพื้นที่ห้อง จำนวนห้องนอน และผังพื้นไปแขวนไว้ที่ <code>UNIT</code> ทั้งหมด ทำให้ห้อง 268 ห้องเก็บค่าเดิมซ้ำ 268 รอบ ที่ถูกคือแขวนไว้ที่ <code>UNIT_TYPE</code> แล้วให้ <code>UNIT</code> อ้างถึง</div>
+</section>
+
+<!-- ============ 4. SHEET 02 PEOPLE ============ -->
+<section>
+  <h2><span class="num">04</span>ผัง 02 — ผู้ใช้งานและการสืบทอด</h2>
+  <p class="sub">ผังนี้คือหัวใจของคำว่า "EER" — มี specialization 2 ระดับ ความสัมพันธ์เวียนเกิด และแอตทริบิวต์ครบทุกชนิด</p>
+
+  <figure class="sheet">
+    <div class="tb"><span class="tb-no">ผัง 02</span><h3>PEOPLE — บุคคล · ลูกค้า · พนักงาน</h3><span class="tb-note">Chen + EER specialization</span></div>
+    <div class="canvas">
+      <svg class="dg" width="1560" height="1010" viewBox="0 0 1560 1010" role="img" aria-label="ผัง EER ฝั่งผู้ใช้งาน แสดง PERSON แตกเป็น CUSTOMER และ STAFF แบบทับซ้อน และ CUSTOMER แตกเป็นลูกค้าไทยกับลูกค้าต่างชาติแบบไม่ทับซ้อน">
+
+        <!-- composite name -->
+        <line class="ln" x1="470" y1="131" x2="342" y2="70"/>
+        <line class="ln" x1="470" y1="131" x2="470" y2="64"/>
+        <line class="ln" x1="470" y1="131" x2="598" y2="70"/>
+        <line class="ln" x1="512" y1="158" x2="632" y2="228"/>
+        <!-- person attr leaders -->
+        <line class="ln" x1="630" y1="250" x2="436" y2="250"/>
+        <line class="ln" x1="742" y1="227" x2="888" y2="160"/>
+        <line class="ln" x1="762" y1="234" x2="998" y2="205"/>
+        <line class="ln" x1="770" y1="262" x2="996" y2="298"/>
+        <line class="ln" x1="770" y1="272" x2="1176" y2="416"/>
+
+        <!-- specialization 1 : person -> customer / staff  (total, double line) -->
+        <line class="eerl" x1="697" y1="273" x2="697" y2="384"/>
+        <line class="eerl" x1="703" y1="273" x2="703" y2="384"/>
+        <line class="eerl" x1="700" y1="416" x2="700" y2="470"/>
+        <line class="eerl" x1="500" y1="470" x2="920" y2="470"/>
+        <line class="eerl" x1="500" y1="470" x2="500" y2="517"/>
+        <line class="eerl" x1="920" y1="470" x2="920" y2="517"/>
+
+        <!-- customer attrs -->
+        <line class="ln" x1="430" y1="530" x2="306" y2="628"/>
+        <line class="ln" x1="430" y1="556" x2="306" y2="716"/>
+        <!-- staff attrs -->
+        <line class="ln" x1="990" y1="528" x2="1094" y2="518"/>
+        <line class="ln" x1="990" y1="552" x2="1094" y2="608"/>
+
+        <!-- staff recursive -->
+        <line class="lns" x1="990" y1="530" x2="1150" y2="530"/>
+        <line class="lns" x1="1150" y1="530" x2="1150" y2="693"/>
+        <line class="lns" x1="880" y1="563" x2="880" y2="760"/>
+        <line class="lns" x1="880" y1="760" x2="1120" y2="760"/>
+        <line class="lns" x1="1120" y1="760" x2="1120" y2="747"/>
+
+        <!-- specialization 2 : customer -> thai / foreign -->
+        <line class="eerl" x1="497" y1="563" x2="497" y2="644"/>
+        <line class="eerl" x1="503" y1="563" x2="503" y2="644"/>
+        <line class="eerl" x1="500" y1="676" x2="500" y2="730"/>
+        <line class="eerl" x1="330" y1="730" x2="680" y2="730"/>
+        <line class="eerl" x1="330" y1="730" x2="330" y2="777"/>
+        <line class="eerl" x1="680" y1="730" x2="680" y2="777"/>
+        <!-- subclass attrs -->
+        <line class="ln" x1="290" y1="823" x2="230" y2="884"/>
+        <line class="ln" x1="660" y1="823" x2="628" y2="902"/>
+        <line class="ln" x1="720" y1="820" x2="790" y2="884"/>
+
+        <!-- ENTITIES -->
+        <rect class="ent" x="630" y="227" width="140" height="46" rx="2"/><text class="te" x="700" y="256">PERSON</text>
+        <rect class="eerf" x="430" y="517" width="140" height="46" rx="2"/><text class="te" x="500" y="546">CUSTOMER</text>
+        <rect class="eerf" x="850" y="517" width="140" height="46" rx="2"/><text class="te" x="920" y="546">STAFF</text>
+        <rect class="eerf" x="260" y="777" width="140" height="46" rx="2"/><text class="te" x="330" y="806">THAI_CUS</text>
+        <rect class="eerf" x="610" y="777" width="140" height="46" rx="2"/><text class="te" x="680" y="806">FOREIGN_CUS</text>
+
+        <!-- specialization circles -->
+        <circle class="eerf" cx="700" cy="400" r="16"/><text class="tx" x="700" y="405">o</text>
+        <text class="tx" x="500" y="500" transform="rotate(-90 500 500)">⊂</text>
+        <text class="tx" x="920" y="500" transform="rotate(-90 920 500)">⊂</text>
+        <text class="tnote" x="808" y="446">total · overlapping</text>
+
+        <circle class="eerf" cx="500" cy="660" r="16"/><text class="tx" x="500" y="665">d</text>
+        <text class="tx" x="330" y="760" transform="rotate(-90 330 760)">⊂</text>
+        <text class="tx" x="680" y="760" transform="rotate(-90 680 760)">⊂</text>
+        <text class="tnote" x="612" y="706">total · disjoint</text>
+
+        <!-- recursive relationship -->
+        <polygon class="rel" points="1056,720 1120,693 1184,720 1120,747"/><text class="tr" x="1120" y="724">SUPERVISES</text>
+        <text class="tc" x="1170" y="608">1</text>
+        <text class="tc" x="896" y="700">N</text>
+        <text class="ta" x="1256" y="668">หัวหน้า</text>
+        <text class="ta" x="828" y="742">ลูกทีม</text>
+
+        <!-- ATTRIBUTES -->
+        <ellipse class="att" cx="470" cy="150" rx="56" ry="19"/><text class="ta" x="470" y="154">name</text>
+        <ellipse class="att" cx="330" cy="52" rx="52" ry="18"/><text class="ta" x="330" y="56">prefix</text>
+        <ellipse class="att" cx="470" cy="45" rx="52" ry="18"/><text class="ta" x="470" y="49">first_name</text>
+        <ellipse class="att" cx="610" cy="52" rx="52" ry="18"/><text class="ta" x="610" y="56">last_name</text>
+        <ellipse class="att" cx="380" cy="250" rx="56" ry="19"/><text class="ta k" x="380" y="254">person_id</text>
+        <ellipse class="att" cx="900" cy="140" rx="62" ry="25"/>
+        <ellipse class="att" cx="900" cy="140" rx="56" ry="19"/><text class="ta" x="900" y="144">phone</text>
+        <ellipse class="att" cx="1054" cy="200" rx="56" ry="19"/><text class="ta" x="1054" y="204">email</text>
+        <ellipse class="att" cx="1052" cy="300" rx="56" ry="19"/><text class="ta" x="1052" y="304">dob</text>
+        <ellipse class="att-d" cx="1232" cy="424" rx="56" ry="19"/><text class="ta" x="1232" y="428">age</text>
+
+        <ellipse class="att" cx="250" cy="638" rx="56" ry="19"/><text class="ta" x="250" y="642">income</text>
+        <ellipse class="att" cx="250" cy="726" rx="56" ry="19"/><text class="ta" x="250" y="730">pdpa_ok</text>
+        <ellipse class="att" cx="1150" cy="512" rx="56" ry="19"/><text class="ta" x="1150" y="516">position</text>
+        <ellipse class="att" cx="1150" cy="614" rx="56" ry="19"/><text class="ta" x="1150" y="618">hire_date</text>
+
+        <ellipse class="att" cx="200" cy="900" rx="56" ry="19"/><text class="ta" x="200" y="904">id_card</text>
+        <ellipse class="att" cx="620" cy="920" rx="56" ry="19"/><text class="ta" x="620" y="924">passport</text>
+        <ellipse class="att" cx="800" cy="898" rx="56" ry="19"/><text class="ta" x="800" y="902">visa_type</text>
+      </svg>
+    </div>
+    <p class="scrollhint">← เลื่อนแนวนอนเพื่อดูผังทั้งแผ่น</p>
+    <figcaption><b>ทำไม PERSON แตกเป็น overlapping (o):</b> พนักงานขายซื้อห้องในโครงการตัวเองได้ คนคนเดียวจึงเป็นทั้ง <code>CUSTOMER</code> และ <code>STAFF</code> พร้อมกัน — ต่างจาก <code>CUSTOMER</code> ที่แตกเป็นไทย/ต่างชาติซึ่งเป็นได้อย่างเดียว (d) และต้องแยกจริง เพราะโควตาต่างชาติ 49% นับเฉพาะกลุ่มหลัง</figcaption>
+  </figure>
+
+  <h3>ความสัมพันธ์สามทาง — การนัดชมห้อง</h3>
+  <figure class="sheet">
+    <div class="tb"><span class="tb-no">ผัง 02ก</span><h3>Ternary relationship</h3><span class="tb-note">3 เอนทิตีในความสัมพันธ์เดียว</span></div>
+    <div class="canvas">
+      <svg class="dg" width="1000" height="420" viewBox="0 0 1000 420" role="img" aria-label="ความสัมพันธ์สามทาง VISIT เชื่อม CUSTOMER PROJECT และ STAFF พร้อมแอตทริบิวต์วันเวลา">
+        <line class="lns" x1="230" y1="100" x2="404" y2="192"/>
+        <line class="lns" x1="230" y1="320" x2="404" y2="228"/>
+        <line class="lns" x1="596" y1="210" x2="700" y2="210"/>
+        <line class="ln" x1="480" y1="234" x2="410" y2="332"/>
+        <line class="ln" x1="520" y1="234" x2="570" y2="332"/>
+
+        <rect class="ent" x="90" y="77" width="140" height="46" rx="2"/><text class="te" x="160" y="106">CUSTOMER</text>
+        <rect class="ent" x="90" y="297" width="140" height="46" rx="2"/><text class="te" x="160" y="326">PROJECT</text>
+        <rect class="ent" x="700" y="187" width="140" height="46" rx="2"/><text class="te" x="770" y="216">STAFF</text>
+        <polygon class="rel" points="404,210 500,172 596,210 500,248"/><text class="tr" x="500" y="214">VISIT</text>
+
+        <ellipse class="att" cx="390" cy="350" rx="56" ry="19"/><text class="ta" x="390" y="354">visit_date</text>
+        <ellipse class="att" cx="586" cy="350" rx="56" ry="19"/><text class="ta" x="586" y="354">time_slot</text>
+
+        <text class="tc" x="290" y="130">M</text>
+        <text class="tc" x="290" y="298">N</text>
+        <text class="tc" x="648" y="198">P</text>
+      </svg>
+    </div>
+    <figcaption>การนัดชมห้อง 1 ครั้ง = ลูกค้าคนหนึ่ง + โครงการหนึ่ง + พนักงานคนหนึ่ง + วันเวลา ถ้าแยกเป็นความสัมพันธ์คู่ 3 อัน จะเสียข้อมูลว่าใครนัดกับใครที่ไหน — แปลงเป็นตาราง <code>appointment</code> ที่มี FK 3 ตัว</figcaption>
+  </figure>
+
+  <h3>ประเภทรวม — ไฟล์สื่อ</h3>
+  <figure class="sheet">
+    <div class="tb"><span class="tb-no">ผัง 02ข</span><h3>Category / union type</h3><span class="tb-note">EER เท่านั้น</span></div>
+    <div class="canvas">
+      <svg class="dg" width="1220" height="400" viewBox="0 0 1220 400" role="img" aria-label="ประเภทรวม MEDIA_OWNER รับสมาชิกจาก PROJECT UNIT และ UNIT_TYPE แล้วเชื่อมกับ MEDIA">
+        <line class="eerl" x1="230" y1="90" x2="304" y2="170"/>
+        <line class="eerl" x1="230" y1="200" x2="312" y2="200"/>
+        <line class="eerl" x1="230" y1="310" x2="304" y2="230"/>
+        <line class="eerl" x1="352" y1="200" x2="530" y2="200"/>
+        <line class="lns" x1="670" y1="200" x2="786" y2="200"/>
+        <line class="lns" x1="914" y1="200" x2="1030" y2="200"/>
+
+        <rect class="ent" x="90" y="67" width="140" height="46" rx="2"/><text class="te" x="160" y="96">PROJECT</text>
+        <rect class="ent" x="90" y="177" width="140" height="46" rx="2"/><text class="te" x="160" y="206">UNIT</text>
+        <rect class="ent" x="90" y="287" width="140" height="46" rx="2"/><text class="te" x="160" y="316">UNIT_TYPE</text>
+        <circle class="eerf" cx="332" cy="200" r="20"/><text class="tx" x="332" y="207">∪</text>
+        <text class="tx" x="446" y="206" transform="rotate(180 446 200)">⊂</text>
+        <rect class="eerf" x="530" y="177" width="140" height="46" rx="2"/><text class="te" x="600" y="206">MEDIA_OWNER</text>
+        <polygon class="rel" points="786,200 850,173 914,200 850,227"/><text class="tr" x="850" y="204">SHOWS</text>
+        <rect class="ent" x="1030" y="177" width="140" height="46" rx="2"/><text class="te" x="1100" y="206">MEDIA</text>
+
+        <text class="tc" x="742" y="188">1</text>
+        <text class="tc" x="966" y="188">N</text>
+        <text class="tnote" x="332" y="262">รับสมาชิกจาก 3 ซูเปอร์คลาส</text>
+      </svg>
+    </div>
+    <figcaption>รูปภาพผูกได้กับทั้งโครงการ ห้อง และแบบห้อง ซึ่งมีคีย์คนละแบบ — EER แก้ด้วย category (∪) แปลงเป็นตาราง <code>media(media_id, owner_type, owner_id, url)</code> โดย <code>owner_type</code> บอกว่า <code>owner_id</code> ชี้ไปตารางไหน</figcaption>
+  </figure>
+</section>
+
+<!-- ============ 5. SHEET 03 SALES ============ -->
+<section>
+  <h2><span class="num">05</span>ผัง 03 — การจองและการเงิน</h2>
+  <p class="sub">ฝั่งธุรกรรม <b>BOOKING</b> เป็นศูนย์กลาง มีเอนทิตีอ่อน 2 ตัวที่มีชีวิตอยู่ได้เพราะใบจองเท่านั้น</p>
+
+  <figure class="sheet">
+    <div class="tb"><span class="tb-no">ผัง 03</span><h3>SALES — ลูกค้ามุ่งหวัง · ใบจอง · การชำระเงิน</h3><span class="tb-note">Chen + weak entity</span></div>
+    <div class="canvas">
+      <svg class="dg" width="1700" height="1010" viewBox="0 0 1700 1010" role="img" aria-label="ผัง EER ฝั่งธุรกรรม แสดง BOOKING เป็นศูนย์กลางเชื่อมกับ CUSTOMER LEAD UNIT STAFF และเอนทิตีอ่อน INSTALLMENT กับ DOCUMENT">
+
+        <!-- customer - generates - lead -->
+        <line class="lns" x1="160" y1="173" x2="160" y2="248"/>
+        <line class="lns" x1="160" y1="302" x2="160" y2="377"/>
+        <!-- customer - makes - booking -->
+        <line class="lns" x1="230" y1="165" x2="418" y2="288"/>
+        <line class="lns" x1="544" y1="302" x2="760" y2="440"/>
+        <!-- lead - converts - booking -->
+        <line class="lns" x1="230" y1="412" x2="418" y2="462"/>
+        <line class="lns" x1="544" y1="470" x2="760" y2="465"/>
+        <!-- unit - for_unit - booking (total on booking) -->
+        <line class="lns" x1="230" y1="640" x2="416" y2="640"/>
+        <line class="lns" x1="547" y1="628" x2="772" y2="490"/>
+        <line class="lns" x1="541" y1="620" x2="766" y2="482"/>
+        <!-- staff - handles - booking -->
+        <line class="lns" x1="230" y1="860" x2="416" y2="860"/>
+        <line class="lns" x1="544" y1="860" x2="790" y2="490"/>
+        <!-- booking - has_inst - installment (total) -->
+        <line class="lns" x1="880" y1="440" x2="1086" y2="252"/>
+        <line class="lns" x1="1214" y1="247" x2="1360" y2="247"/>
+        <line class="lns" x1="1214" y1="253" x2="1360" y2="253"/>
+        <!-- booking - paid_by - payment -->
+        <line class="lns" x1="900" y1="465" x2="1086" y2="470"/>
+        <line class="lns" x1="1214" y1="470" x2="1360" y2="470"/>
+        <!-- installment - settles - payment -->
+        <line class="lns" x1="1430" y1="279" x2="1430" y2="333"/>
+        <line class="lns" x1="1430" y1="387" x2="1430" y2="447"/>
+        <!-- booking - requires - document (total) -->
+        <line class="lns" x1="880" y1="483" x2="1086" y2="688"/>
+        <line class="lns" x1="1214" y1="687" x2="1360" y2="687"/>
+        <line class="lns" x1="1214" y1="693" x2="1360" y2="693"/>
+        <!-- booking - applies - promotion -->
+        <line class="lns" x1="830" y1="483" x2="830" y2="633"/>
+        <line class="lns" x1="830" y1="687" x2="830" y2="797"/>
+        <!-- booking - financed - loan - from - bank -->
+        <line class="lns" x1="862" y1="483" x2="1086" y2="856"/>
+        <line class="lns" x1="1150" y1="907" x2="1150" y2="967"/>
+        <line class="lns" x1="1214" y1="994" x2="1350" y2="994"/>
+
+        <!-- attribute leaders -->
+        <line class="ln" x1="790" y1="437" x2="742" y2="317"/>
+        <line class="ln" x1="830" y1="437" x2="874" y2="299"/>
+        <line class="ln" x1="890" y1="440" x2="1000" y2="392"/>
+        <line class="ln" x1="160" y1="377" x2="80" y2="316"/>
+        <line class="ln" x1="200" y1="377" x2="280" y2="316"/>
+        <line class="ln" x1="1394" y1="224" x2="1352" y2="140"/>
+        <line class="ln" x1="1430" y1="221" x2="1500" y2="160"/>
+        <line class="ln" x1="1500" y1="460" x2="1566" y2="410"/>
+        <line class="ln" x1="1500" y1="482" x2="1566" y2="540"/>
+        <line class="ln" x1="1500" y1="680" x2="1566" y2="640"/>
+        <line class="ln" x1="1500" y1="702" x2="1566" y2="760"/>
+        <line class="ln" x1="800" y1="843" x2="700" y2="912"/>
+        <line class="ln" x1="860" y1="843" x2="920" y2="912"/>
+        <line class="ln" x1="1210" y1="861" x2="1300" y2="800"/>
+        <line class="ln" x1="1420" y1="994" x2="1494" y2="944"/>
+
+        <!-- ENTITIES -->
+        <rect class="ent" x="90" y="127" width="140" height="46" rx="2"/><text class="te" x="160" y="156">CUSTOMER</text>
+        <rect class="ent" x="90" y="377" width="140" height="46" rx="2"/><text class="te" x="160" y="406">LEAD</text>
+        <rect class="ent" x="90" y="617" width="140" height="46" rx="2"/><text class="te" x="160" y="646">UNIT</text>
+        <rect class="ent" x="90" y="837" width="140" height="46" rx="2"/><text class="te" x="160" y="866">STAFF</text>
+        <text class="tsheet" x="160" y="112">ผัง 02</text>
+        <text class="tsheet" x="160" y="602">ผัง 01</text>
+        <text class="tsheet" x="160" y="822">ผัง 02</text>
+
+        <rect class="ent" x="760" y="437" width="140" height="46" rx="2"/><text class="te" x="830" y="466">BOOKING</text>
+        <rect class="ent" x="1360" y="437" width="140" height="46" rx="2"/><text class="te" x="1430" y="466">PAYMENT</text>
+        <rect class="ent" x="760" y="797" width="140" height="46" rx="2"/><text class="te" x="830" y="826">PROMOTION</text>
+        <rect class="ent" x="1080" y="861" width="140" height="46" rx="2"/><text class="te" x="1150" y="890">LOAN</text>
+        <rect class="ent" x="1350" y="971" width="140" height="46" rx="2"/><text class="te" x="1420" y="1000">BANK</text>
+
+        <!-- weak entities -->
+        <rect class="ent" x="1354" y="221" width="152" height="58" rx="2"/>
+        <rect class="ent-in" x="1360" y="227" width="140" height="46" rx="2"/>
+        <text class="te" x="1430" y="256">INSTALLMENT</text>
+        <rect class="ent" x="1354" y="661" width="152" height="58" rx="2"/>
+        <rect class="ent-in" x="1360" y="667" width="140" height="46" rx="2"/>
+        <text class="te" x="1430" y="696">DOCUMENT</text>
+
+        <!-- RELATIONSHIPS -->
+        <polygon class="rel" points="96,275 160,248 224,275 160,302"/><text class="tr" x="160" y="279">GENERATES</text>
+        <polygon class="rel" points="416,300 480,273 544,300 480,327"/><text class="tr" x="480" y="304">MAKES</text>
+        <polygon class="rel" points="416,470 480,443 544,470 480,497"/><text class="tr" x="480" y="474">CONVERTS</text>
+        <polygon class="rel" points="416,640 480,613 544,640 480,667"/><text class="tr" x="480" y="644">FOR_UNIT</text>
+        <polygon class="rel" points="416,860 480,833 544,860 480,887"/><text class="tr" x="480" y="864">HANDLES</text>
+        <polygon class="rel" points="1086,470 1150,443 1214,470 1150,497"/><text class="tr" x="1150" y="474">PAID_BY</text>
+        <polygon class="rel" points="766,660 830,633 894,660 830,687"/><text class="tr" x="830" y="664">APPLIES</text>
+        <polygon class="rel" points="1086,880 1150,853 1214,880 1150,907"/><text class="tr" x="1150" y="884">FINANCED</text>
+        <polygon class="rel" points="1086,994 1150,967 1214,994 1150,1021"/><text class="tr" x="1150" y="998">FROM</text>
+        <polygon class="rel" points="1380,360 1430,333 1480,360 1430,387"/><text class="tr" x="1430" y="364">SETTLES</text>
+
+        <!-- identifying relationships (double diamond) -->
+        <polygon class="rel" points="1080,250 1150,217 1220,250 1150,283"/>
+        <polygon class="rel-in" points="1093,250 1150,227 1207,250 1150,273"/>
+        <text class="tr" x="1150" y="254">HAS_INST</text>
+        <polygon class="rel" points="1080,690 1150,657 1220,690 1150,723"/>
+        <polygon class="rel-in" points="1093,690 1150,667 1207,690 1150,713"/>
+        <text class="tr" x="1150" y="694">REQUIRES</text>
+
+        <!-- ATTRIBUTES -->
+        <ellipse class="att" cx="720" cy="298" rx="56" ry="19"/><text class="ta k" x="720" y="302">booking_no</text>
+        <ellipse class="att" cx="880" cy="280" rx="56" ry="19"/><text class="ta" x="880" y="284">book_date</text>
+        <ellipse class="att" cx="1030" cy="380" rx="56" ry="19"/><text class="ta" x="1030" y="384">status</text>
+
+        <ellipse class="att" cx="70" cy="297" rx="52" ry="18"/><text class="ta k" x="70" y="301">lead_id</text>
+        <ellipse class="att" cx="290" cy="297" rx="52" ry="18"/><text class="ta" x="290" y="301">score</text>
+
+        <ellipse class="att" cx="1340" cy="122" rx="56" ry="19"/><text class="ta pk" x="1340" y="126">inst_no</text>
+        <ellipse class="att" cx="1512" cy="142" rx="56" ry="19"/><text class="ta" x="1512" y="146">due_date</text>
+
+        <ellipse class="att" cx="1594" cy="394" rx="56" ry="19"/><text class="ta k" x="1594" y="398">payment_id</text>
+        <ellipse class="att" cx="1594" cy="556" rx="56" ry="19"/><text class="ta" x="1594" y="560">method</text>
+
+        <ellipse class="att" cx="1594" cy="624" rx="56" ry="19"/><text class="ta pk" x="1594" y="628">doc_name</text>
+        <ellipse class="att" cx="1594" cy="776" rx="56" ry="19"/><text class="ta" x="1594" y="780">doc_status</text>
+
+        <ellipse class="att" cx="680" cy="930" rx="56" ry="19"/><text class="ta k" x="680" y="934">promo_id</text>
+        <ellipse class="att" cx="940" cy="930" rx="56" ry="19"/><text class="ta" x="940" y="934">discount</text>
+
+        <ellipse class="att" cx="1318" cy="788" rx="56" ry="19"/><text class="ta" x="1318" y="792">loan_amt</text>
+        <ellipse class="att" cx="1516" cy="932" rx="56" ry="19"/><text class="ta k" x="1516" y="936">bank_id</text>
+
+        <!-- CARDINALITY -->
+        <text class="tc" x="176" y="238">1</text>
+        <text class="tc" x="176" y="366">N</text>
+        <text class="tc" x="264" y="204">1</text>
+        <text class="tc" x="596" y="330">N</text>
+        <text class="tc" x="268" y="428">1</text>
+        <text class="tc" x="600" y="456">1</text>
+        <text class="tc" x="264" y="628">1</text>
+        <text class="tc" x="620" y="562">1</text>
+        <text class="tc" x="264" y="848">1</text>
+        <text class="tc" x="640" y="720">N</text>
+        <text class="tc" x="940" y="404">1</text>
+        <text class="tc" x="1300" y="236">N</text>
+        <text class="tc" x="962" y="452">1</text>
+        <text class="tc" x="1300" y="456">N</text>
+        <text class="tc" x="946" y="558">1</text>
+        <text class="tc" x="1300" y="676">N</text>
+        <text class="tc" x="846" y="612">M</text>
+        <text class="tc" x="846" y="778">N</text>
+        <text class="tc" x="948" y="640">1</text>
+        <text class="tc" x="1078" y="828">1</text>
+        <text class="tc" x="1166" y="944">N</text>
+        <text class="tc" x="1300" y="982">1</text>
+        <text class="tc" x="1446" y="316">0..1</text>
+        <text class="tc" x="1446" y="424">1</text>
+      </svg>
+    </div>
+    <p class="scrollhint">← เลื่อนแนวนอนเพื่อดูผังทั้งแผ่น</p>
+    <figcaption><b>ทำไม INSTALLMENT เป็นเอนทิตีอ่อน:</b> "งวดที่ 3" ไม่มีความหมายลอย ๆ ต้องบอกว่างวดที่ 3 <em>ของใบจองไหน</em> คีย์จริงจึงเป็น (booking_no, inst_no) — เส้นคู่แปลว่าทุกใบจองต้องมีงวดผ่อนอย่างน้อยหนึ่งงวด · <code>SETTLES</code> เป็น 0..1 เพราะเงินที่จ่ายเข้ามาอาจเป็นเงินจองหรือเงินทำสัญญาซึ่งไม่ผูกกับงวดใด</figcaption>
+  </figure>
+</section>
+
+<!-- ============ 6. EER CONSTRUCT TABLE ============ -->
+<section>
+  <h2><span class="num">06</span>ส่วนขยาย EER ที่ใช้ และเหตุผล</h2>
+  <p class="sub">ถ้าอาจารย์ถามว่า "ทำไมต้อง EER ไม่ใช่ ER ธรรมดา" ตอบจากตารางนี้</p>
+
+  <div class="tblwrap">
+    <table>
+      <thead><tr><th>ส่วนขยาย</th><th class="m">ใช้ที่</th><th>เหตุผลเชิงธุรกิจ</th></tr></thead>
+      <tbody>
+        <tr><td><span class="pill e">Specialization</span></td><td class="m">PERSON → CUSTOMER, STAFF</td><td>ชื่อ เบอร์ บัตรประชาชน เหมือนกันหมด ถ้าแยกตารางจะซ้ำ — total เพราะทุกคนในระบบต้องเป็นอย่างน้อยหนึ่งอย่าง, overlapping เพราะพนักงานซื้อห้องเองได้</td></tr>
+        <tr><td><span class="pill e">Specialization</span></td><td class="m">CUSTOMER → THAI, FOREIGN</td><td>โควตาต่างชาติ 49% เป็นข้อกฎหมาย ต้องนับแยกได้ และแอตทริบิวต์ต่างกัน (เลขบัตร ปชช. vs พาสปอร์ต + วีซ่า) — disjoint เพราะเป็นได้อย่างเดียว</td></tr>
+        <tr><td><span class="pill e">Category (∪)</span></td><td class="m">MEDIA_OWNER</td><td>รูปผูกได้กับโครงการ ห้อง หรือแบบห้อง ซึ่งมีคีย์คนละชุด ER ธรรมดาต้องสร้าง 3 ตารางรูป</td></tr>
+        <tr><td><span class="pill">Weak entity</span></td><td class="m">INSTALLMENT, DOCUMENT, NEARBY</td><td>ไม่มีตัวตนถ้าไม่มีเอนทิตีแม่ คีย์เป็นคีย์ผสมของแม่ + คีย์บางส่วน</td></tr>
+        <tr><td><span class="pill">Ternary</span></td><td class="m">VISIT</td><td>การนัดชมห้องต้องรู้ครบ 3 ฝ่ายพร้อมกัน แยกเป็นคู่แล้วข้อมูลหาย</td></tr>
+        <tr><td><span class="pill">Recursive</span></td><td class="m">STAFF SUPERVISES STAFF</td><td>ทีมขายมีหัวหน้าทีมที่เป็นพนักงานเหมือนกัน</td></tr>
+        <tr><td><span class="pill">M:N + attribute</span></td><td class="m">NEAR, PROVIDES, APPLIES</td><td>ระยะทาง/เวลาเดิน เป็นของ "คู่" ไม่ใช่ของโครงการหรือสถานีฝ่ายเดียว</td></tr>
+        <tr><td><span class="pill">Derived</span></td><td class="m">price_net, total_units, age</td><td>คำนวณได้ ไม่ควรเก็บซ้ำ (ถ้าเก็บเพื่อความเร็ว ต้องระบุว่าจงใจ denormalize)</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ============ 7. MAPPING ============ -->
+<section>
+  <h2><span class="num">07</span>แปลง EER → Relational</h2>
+  <p class="sub">ขั้นตอนมาตรฐาน 8 ขั้น กับผลลัพธ์จริงในแบบนี้</p>
+
+  <div class="tblwrap">
+    <table>
+      <thead><tr><th class="m">ขั้น</th><th>กฎ</th><th class="m">ผลในแบบนี้</th></tr></thead>
+      <tbody>
+        <tr><td class="m">1</td><td>เอนทิตีปกติ → 1 ตาราง คีย์หลักคือ key attribute</td><td class="m">project, building, unit, facility, bank …</td></tr>
+        <tr><td class="m">2</td><td>เอนทิตีอ่อน → 1 ตาราง PK = PK ของแม่ + partial key</td><td class="m">installment(<u>booking_id, inst_no</u>)<br>booking_document(<u>booking_id, doc_name</u>)</td></tr>
+        <tr><td class="m">3</td><td>1:1 → ใส่ FK ไว้ฝั่งที่ participation เป็น total</td><td class="m">booking.lead_id</td></tr>
+        <tr><td class="m">4</td><td>1:N → ใส่ FK ไว้ฝั่ง N</td><td class="m">unit.building_id, building.project_id</td></tr>
+        <tr><td class="m">5</td><td>M:N → สร้างตารางเชื่อม PK ผสม + ย้ายแอตทริบิวต์ของความสัมพันธ์มาไว้ที่นี่</td><td class="m">project_transit(<u>project_id, station_id</u>, distance_m, walk_min)<br>project_facility, booking_promotion, project_bank_rate</td></tr>
+        <tr><td class="m">6</td><td>Multivalued → แยกเป็นตารางลูก</td><td class="m">person_phone(<u>person_id, phone</u>)<br>unit_tag(<u>unit_id, tag</u>)</td></tr>
+        <tr><td class="m">7</td><td>ความสัมพันธ์ n-ary → 1 ตาราง มี FK ครบทุกฝ่าย</td><td class="m">appointment(<u>appt_id</u>, customer_id, project_id, staff_id, visit_date, time_slot)</td></tr>
+        <tr><td class="m">8</td><td>Specialization → เลือก 1 ใน 4 วิธี</td><td class="m">ดูด้านล่าง</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>ขั้น 8 — แปลง specialization ยังไงดี</h3>
+  <div class="tblwrap">
+    <table>
+      <thead><tr><th>วิธี</th><th>เหมาะกับ</th><th>เลือกใช้ที่</th></tr></thead>
+      <tbody>
+        <tr><td class="m">8A · แยกทุกตาราง<br>(super + subs)</td><td>total หรือ overlapping ก็ได้ · ซับคลาสมีแอตทริบิวต์เยอะ</td><td class="m"><b>PERSON → CUSTOMER, STAFF</b><br>เพราะ overlapping จำเป็นต้องใช้วิธีนี้</td></tr>
+        <tr><td class="m">8B · เฉพาะซับคลาส</td><td>total + disjoint เท่านั้น</td><td class="m">ไม่ใช้ (จะเสีย PERSON กลาง)</td></tr>
+        <tr><td class="m">8C · ตารางเดียว + type field</td><td>disjoint · ซับคลาสมีแอตทริบิวต์น้อย</td><td class="m"><b>CUSTOMER → THAI/FOREIGN</b><br>customer(…, nationality_type, id_card, passport_no, visa_type)</td></tr>
+        <tr><td class="m">8D · ตารางเดียว + flag หลายตัว</td><td>overlapping · แอตทริบิวต์น้อยมาก</td><td class="m">ไม่ใช้</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="note" style="margin-top:20px"><b>Category แปลงยังไง:</b> <code>MEDIA_OWNER</code> ใช้ surrogate key — สร้างตาราง <code>media(media_id, owner_type, owner_id, url, sort_order)</code> แล้วบังคับความถูกต้องด้วย CHECK constraint หรือ application logic เพราะ FK เดียวชี้ 3 ตารางพร้อมกันไม่ได้</div>
+</section>
+
+<!-- ============ 8. DICTIONARY ============ -->
+<section>
+  <h2><span class="num">08</span>พจนานุกรมข้อมูล</h2>
+  <p class="sub">แอตทริบิวต์ครบทุกเอนทิตี — <u>ขีดทึบ</u> = คีย์หลัก · <u class="d">ขีดประ</u> = คีย์บางส่วน · <i style="color:var(--red);font-style:normal">แดง</i> = คีย์นอก</p>
+
+  <div class="dict">
+
+    <div class="card"><h4>DEVELOPER</h4><p class="cap">บริษัทผู้พัฒนา</p><ul>
+      <li><u>developer_id</u></li><li>name · tax_id</li><li>phone · website</li></ul></div>
+
+    <div class="card"><h4>PROJECT</h4><p class="cap">โครงการคอนโด</p><ul>
+      <li><u>project_id</u> · code</li><li><i>developer_id</i></li>
+      <li>name_th · name_en · tagline</li><li>type · status · progress_pct</li>
+      <li>address · district · province · postcode</li><li>lat · lng</li>
+      <li>land_area_rai · floors_max</li><li>ownership · foreign_quota_pct</li>
+      <li>common_fee_per_sqm · sinking_fund_per_sqm</li><li>common_fee_advance_months</li>
+      <li>juristic_name · completed_quarter</li><li>booking_fee · contract_fee_pct</li>
+      <li>down_pct · down_installments</li><li>· total_units (derived)</li></ul></div>
+
+    <div class="card"><h4>BUILDING</h4><p class="cap">อาคารในโครงการ</p><ul>
+      <li><u>building_id</u> · <i>project_id</i></li><li>code · floors</li>
+      <li>units_per_floor · elevators</li><li>UNIQUE(project_id, code)</li></ul></div>
+
+    <div class="card"><h4>UNIT_TYPE</h4><p class="cap">แบบห้อง / ผังพื้น</p><ul>
+      <li><u>type_id</u> · <i>project_id</i></li><li>layout_code · name</li>
+      <li>bedrooms · bathrooms</li><li>usable_area_sqm · balcony_area_sqm</li>
+      <li>base_price_per_sqm</li><li><i>floorplan_media_id</i></li></ul></div>
+
+    <div class="card"><h4>UNIT</h4><p class="cap">ห้องชุดรายห้อง</p><ul>
+      <li><u>unit_id</u></li><li><i>project_id</i> · <i>building_id</i> · <i>type_id</i></li>
+      <li>unit_no · floor · direction · view</li><li>furnishing · parking_slots</li>
+      <li>price_list · discount · status</li><li><i>sales_agent_id</i> · hold_until</li>
+      <li>· price_net (derived)</li><li>· price_per_sqm (derived)</li></ul></div>
+
+    <div class="card"><h4>FACILITY / PROJECT_FACILITY</h4><p class="cap">สิ่งอำนวยความสะดวก · M:N</p><ul>
+      <li><u>facility_id</u> · name · category</li>
+      <li><u>project_id, facility_id</u></li><li>detail · floor_no</li></ul></div>
+
+    <div class="card"><h4>TRANSIT_STATION / PROJECT_TRANSIT</h4><p class="cap">รถไฟฟ้าใกล้เคียง · M:N</p><ul>
+      <li><u>station_id</u> · line_name · station_name</li>
+      <li><u>project_id, station_id</u></li><li>distance_m · walk_min</li></ul></div>
+
+    <div class="card"><h4>NEARBY_PLACE</h4><p class="cap">weak — สถานที่ใกล้เคียง</p><ul>
+      <li><u class="d">place_name</u> · <i>project_id</i></li><li>place_type · distance_km</li></ul></div>
+
+    <div class="card"><h4>MEDIA</h4><p class="cap">category — รูป/วิดีโอ</p><ul>
+      <li><u>media_id</u></li><li>owner_type · owner_id</li>
+      <li>url · alt_text · sort_order</li></ul></div>
+
+    <div class="card"><h4>PERSON</h4><p class="cap">ซูเปอร์คลาส</p><ul>
+      <li><u>person_id</u></li><li>prefix · first_name · last_name</li>
+      <li>email · dob · address</li><li>· age (derived)</li>
+      <li>person_phone(<u>person_id, phone</u>)</li></ul></div>
+
+    <div class="card"><h4>CUSTOMER</h4><p class="cap">ซับคลาส (o)</p><ul>
+      <li><u>person_id</u></li><li>nationality_type</li>
+      <li>id_card · passport_no · visa_type</li><li>occupation · monthly_income</li>
+      <li>purpose · source · pdpa_consent</li></ul></div>
+
+    <div class="card"><h4>STAFF</h4><p class="cap">ซับคลาส (o) · recursive</p><ul>
+      <li><u>person_id</u></li><li>position · hire_date · quota_target</li>
+      <li><i>manager_id</i> → STAFF</li></ul></div>
+
+    <div class="card"><h4>USER_ACCOUNT</h4><p class="cap">บัญชีเข้าระบบ</p><ul>
+      <li><u>user_id</u> · <i>person_id</i></li>
+      <li>email · password_hash · role</li><li>last_login_at · is_active</li></ul></div>
+
+    <div class="card"><h4>LEAD</h4><p class="cap">ผู้สนใจ</p><ul>
+      <li><u>lead_id</u></li><li><i>customer_id</i> · <i>project_id</i> · <i>owner_staff_id</i></li>
+      <li>budget_min · budget_max</li><li>status · score</li>
+      <li>next_follow_up · note</li><li>lead_interest(<u>lead_id, type_id</u>)</li></ul></div>
+
+    <div class="card"><h4>APPOINTMENT</h4><p class="cap">ternary — นัดชมห้อง</p><ul>
+      <li><u>appt_id</u></li><li><i>customer_id</i> · <i>project_id</i> · <i>staff_id</i></li>
+      <li>visit_date · time_slot</li><li>channel · status</li></ul></div>
+
+    <div class="card"><h4>FAVORITE</h4><p class="cap">M:N ลูกค้า × ห้อง</p><ul>
+      <li><u>customer_id, unit_id</u></li><li>saved_at</li></ul></div>
+
+    <div class="card"><h4>BOOKING</h4><p class="cap">ใบจอง</p><ul>
+      <li><u>booking_id</u> · booking_no</li>
+      <li><i>customer_id</i> · <i>unit_id</i> · <i>lead_id</i> · <i>sales_agent_id</i></li>
+      <li>booking_fee · booking_date · expire_date</li>
+      <li>contract_fee · contract_date</li><li>down_total · transfer_amount</li>
+      <li>status</li></ul></div>
+
+    <div class="card"><h4>INSTALLMENT</h4><p class="cap">weak — งวดผ่อนดาวน์</p><ul>
+      <li><u>booking_id</u>, <u class="d">inst_no</u></li>
+      <li>due_date · amount</li><li>status · paid_at</li></ul></div>
+
+    <div class="card"><h4>PAYMENT</h4><p class="cap">การชำระเงิน</p><ul>
+      <li><u>payment_id</u></li><li><i>booking_id</i> · <i>inst_no</i> (nullable)</li>
+      <li>payment_type · amount · method</li><li>paid_at · status · receipt_no</li>
+      <li><i>verified_by_staff_id</i></li></ul></div>
+
+    <div class="card"><h4>BOOKING_DOCUMENT</h4><p class="cap">weak — เอกสารประกอบ</p><ul>
+      <li><u>booking_id</u>, <u class="d">doc_name</u></li>
+      <li>doc_status · file_url · received_at</li></ul></div>
+
+    <div class="card"><h4>PROMOTION / BOOKING_PROMOTION</h4><p class="cap">M:N</p><ul>
+      <li><u>promo_id</u> · <i>project_id</i></li>
+      <li>name · promo_type · value</li><li>start_date · end_date</li>
+      <li><u>booking_id, promo_id</u> · applied_value</li></ul></div>
+
+    <div class="card"><h4>BANK / PROJECT_BANK_RATE</h4><p class="cap">M:N + attribute</p><ul>
+      <li><u>bank_id</u> · name · swift</li>
+      <li><u>project_id, bank_id</u></li><li>rate · max_ltv_pct · max_years</li>
+      <li>effective_date</li></ul></div>
+
+    <div class="card"><h4>LOAN_APPLICATION</h4><p class="cap">การยื่นกู้</p><ul>
+      <li><u>loan_id</u> · <i>booking_id</i> · <i>bank_id</i></li>
+      <li>amount · years · rate</li><li>status · submitted_at · approved_at</li></ul></div>
+
+    <div class="card"><h4>FEE_RULE</h4><p class="cap">ตารางค่าคงที่</p><ul>
+      <li><u>rule_code</u></li><li>value · unit</li>
+      <li>effective_from · effective_to</li>
+      <li>เช่น transfer_fee_pct, mortgage_fee_pct</li></ul></div>
+
+  </div>
+</section>
+
+<!-- ============ 9. NEXT ============ -->
+<section>
+  <h2><span class="num">09</span>ถ้าต้องส่งเป็นงาน</h2>
+  <p>ชุดเอกสารที่อาจารย์วิชาฐานข้อมูลมักขอ มี 4 ชิ้น — ตอนนี้มีครบ 3 แล้ว</p>
+  <div class="tblwrap">
+    <table>
+      <thead><tr><th class="m">ชิ้น</th><th>เนื้อหา</th><th class="m">สถานะ</th></tr></thead>
+      <tbody>
+        <tr><td class="m">1</td><td>EER diagram (Chen)</td><td class="m">✅ ผัง 01–03 ในหน้านี้</td></tr>
+        <tr><td class="m">2</td><td>Data dictionary</td><td class="m">✅ หัวข้อ 08</td></tr>
+        <tr><td class="m">3</td><td>ขั้นตอนแปลงเป็น relational schema</td><td class="m">✅ หัวข้อ 07</td></tr>
+        <tr><td class="m">4</td><td>DDL (<code>CREATE TABLE</code>) + normalization 1NF→3NF</td><td class="m">ยังไม่ทำ</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="note" style="margin-top:20px"><b>ถ้าต้องตัด scope:</b> เอาเฉพาะผัง 01 + ผัง 03 (14 เอนทิตี) ก็ครบทุกรูปแบบความสัมพันธ์ที่ข้อสอบถาม — 1:N, M:N มีแอตทริบิวต์, เอนทิตีอ่อน, total/partial participation ส่วนผัง 02 คือส่วนที่ทำให้เป็น "EER" จริง ๆ ถ้าโจทย์ระบุ EER ต้องมี</div>
+</section>
+
+<footer>
+  แบบจำลองอ้างอิงจากชั้นข้อมูลจริงของโปรเจกต์ <code>condo-web</code> · สัญกรณ์ตามตำรา Elmasri &amp; Navathe (วงกลม d/o + สัญลักษณ์ ⊂) ซึ่งใช้ในวิชาฐานข้อมูลของไทยเป็นมาตรฐาน
+</footer>
+
+</div>

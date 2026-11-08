@@ -1,0 +1,574 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>NIRA Residence — คอนโดมิเนียมใจกลางเมือง จองออนไลน์ 24 ชม.</title>
+<meta name="description" content="คอนโดมิเนียมคุณภาพใจกลางกรุงเทพฯ ดูห้องว่างจริง ราคาจริง คำนวณค่าใช้จ่ายวันโอน และจองออนไลน์ได้ทันที">
+<link rel="icon" href="assets/img/favicon.png" type="image/png">
+<meta property="og:type" content="website">
+<meta property="og:title" content="NIRA Residence — คอนโดมิเนียมใจกลางเมือง จองออนไลน์ 24 ชม.">
+<meta property="og:description" content="ดูผังห้องว่างแบบเรียลไทม์ คำนวณค่าใช้จ่ายวันโอนครบทุกบาท และจองออนไลน์ภายใน 5 นาที">
+<meta property="og:image" content="assets/img/og-cover.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="apple-touch-icon" href="assets/img/apple-touch-icon.png">
+<link rel="stylesheet" href="assets/theme.css">
+<style>
+/* --- hero --- */
+.hero{padding:calc(var(--nav-h) + 90px) 0 40px;position:relative;overflow:hidden;}
+.hero-grid{display:grid;grid-template-columns:1fr;gap:20px;text-align:center;place-items:center;}
+.hero h1{max-width:920px;}
+.hero .lead{margin:24px auto 0;text-align:center;}
+.hero-cta{display:flex;gap:14px;justify-content:center;margin-top:34px;flex-wrap:wrap;}
+.hero-trust{display:flex;gap:26px;justify-content:center;margin-top:30px;flex-wrap:wrap;color:var(--muted-2);font-size:13.5px;}
+.hero-trust span{display:flex;align-items:center;gap:7px;}
+
+/* building visual — ถ้ามีไฟล์ assets/img/hero-tower.* รูปจริงจะทับตึก CSS นี้ */
+.hero-media{margin-top:64px;display:block;background:none;}
+.hero-media::after{display:none;}
+.hero-media.has-img{border:1px solid var(--line);border-radius:var(--r-xl);box-shadow:var(--shadow);}
+.hero-media .tower-stage{margin-top:0;transition:opacity .5s ease;}
+.hero-media.has-img .tower-stage{opacity:0;}
+.tower-stage{position:relative;height:430px;display:flex;align-items:flex-end;justify-content:center;gap:18px;}
+.tower{width:118px;border-radius:16px 16px 0 0;background:linear-gradient(180deg,#1c1c1c,#0f0f0f);border:1px solid var(--line);position:relative;overflow:hidden;}
+.tower::before{content:"";position:absolute;inset:0;background-image:repeating-linear-gradient(180deg,transparent 0 12px,rgba(255,255,255,.05) 12px 13px),repeating-linear-gradient(90deg,transparent 0 22px,rgba(255,255,255,.04) 22px 23px);}
+.tower .lit{position:absolute;width:9px;height:6px;background:var(--accent);border-radius:2px;box-shadow:0 0 10px var(--accent-glow);opacity:.85;}
+.tower-a{height:300px;} .tower-b{height:420px;} .tower-c{height:250px;}
+.tower-b{border-color:rgba(214,255,102,.25);box-shadow:0 0 80px -20px var(--accent-glow);}
+.stage-floor{position:absolute;bottom:0;left:50%;transform:translateX(-50%);width:min(880px,92%);height:1px;background:linear-gradient(90deg,transparent,var(--accent-dim),transparent);}
+.float-card{
+  position:absolute;z-index:3;background:rgba(20,20,20,.92);backdrop-filter:blur(10px);
+  border:1px solid var(--line);border-radius:14px;padding:13px 16px;text-align:left;
+  box-shadow:var(--shadow);animation:float 5s ease-in-out infinite;
+}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-11px)}}
+.fc-1{left:2%;top:22%;animation-delay:0s;}
+.fc-2{right:1%;top:12%;animation-delay:.9s;}
+.fc-3{right:6%;bottom:8%;animation-delay:1.7s;}
+@media(max-width:860px){.tower-stage{height:300px;}.tower{width:74px}.tower-b{height:290px}.tower-a{height:210px}.tower-c{height:170px}.float-card{display:none}}
+
+/* bento */
+.bento{display:grid;grid-template-columns:repeat(4,1fr);gap:20px;}
+.bento .card{padding:0;overflow:hidden;display:flex;flex-direction:column;}
+.bento .b-media{aspect-ratio:16/10;position:relative;}
+.bento .b-body{padding:22px 24px 26px;}
+.b-wide{grid-column:span 2;} .b-full{grid-column:span 4;}
+@media(max-width:900px){.bento{grid-template-columns:1fr;}.b-wide,.b-full{grid-column:span 1;}}
+
+/* icon tile */
+.itile{width:44px;height:44px;border-radius:12px;background:var(--accent);color:#0A0A0A;display:grid;place-items:center;font-size:20px;flex:0 0 44px;}
+.itile-ghost{background:var(--accent-ghost);border:1px solid rgba(214,255,102,.24);color:var(--accent);}
+
+/* journey */
+.journey{display:grid;grid-template-columns:repeat(4,1fr);gap:18px;counter-reset:j;}
+.jstep{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-md);padding:24px;position:relative;}
+.jstep .n{width:32px;height:32px;border-radius:50%;background:var(--accent-ghost);border:1px solid rgba(214,255,102,.3);color:var(--accent);display:grid;place-items:center;font-weight:700;font-size:14px;margin-bottom:14px;}
+@media(max-width:900px){.journey{grid-template-columns:1fr;}}
+
+/* calc */
+.calc-grid{display:grid;grid-template-columns:1fr 1fr;gap:32px;align-items:start;}
+@media(max-width:900px){.calc-grid{grid-template-columns:1fr;}}
+input[type=range]{width:100%;accent-color:var(--accent);}
+
+/* pricing */
+.plan{display:flex;flex-direction:column;gap:18px;}
+.plan.featured{border-color:rgba(214,255,102,.4);background:linear-gradient(180deg,rgba(214,255,102,.06),var(--surface) 40%);}
+.plan ul{list-style:none;padding:0;margin:0;display:grid;gap:11px;font-size:14.5px;color:var(--muted);}
+.plan li::before{content:"✓";color:var(--accent);margin-right:9px;font-weight:700;}
+
+/* testimonial */
+.tcard{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-lg);padding:26px;display:flex;flex-direction:column;gap:18px;}
+.avatar{width:42px;height:42px;border-radius:50%;background:linear-gradient(140deg,#2a2a2a,#151515);border:1px solid var(--line);display:grid;place-items:center;font-size:15px;font-weight:700;color:var(--accent);}
+
+/* faq */
+.faq-item{border-bottom:1px solid var(--line);}
+.faq-q{width:100%;background:none;border:0;text-align:left;padding:22px 0;display:flex;justify-content:space-between;gap:20px;align-items:center;cursor:pointer;font-size:17px;font-weight:600;}
+.faq-q .ico{color:var(--accent);font-size:22px;transition:transform .3s;flex:0 0 auto;}
+.faq-item.open .ico{transform:rotate(45deg);}
+.faq-a{max-height:0;overflow:hidden;transition:max-height .35s ease;}
+.faq-a p{padding:0 0 22px;max-width:820px;}
+
+/* cta */
+.cta-box{
+  border-radius:var(--r-xl);border:1px solid rgba(214,255,102,.2);overflow:hidden;position:relative;
+  background:linear-gradient(140deg,rgba(214,255,102,.1),rgba(20,20,20,.9) 55%);padding:66px 40px;text-align:center;
+}
+</style>
+</head>
+<body>
+<script src="assets/data.js"></script>
+<script src="assets/ui.js"></script>
+<script>boot('หน้าแรก')</script>
+
+<!-- ================= HERO ================= -->
+<header class="hero">
+  <div class="gridlines"></div>
+  <div class="glow glow-lime glow-lg" style="left:50%;transform:translateX(-50%);top:-320px;"></div>
+  <div class="wrap rel">
+    <div class="hero-grid">
+      <span class="eyebrow reveal">เปิดจองรอบ Pre-sale · ส่วนลดสูงสุด 5%</span>
+      <h1 class="reveal" data-delay="80">บ้านหลังใหม่ใจกลางเมือง<br>เลือกห้องจริง ราคาจริง <span class="accent">จองได้เลย</span></h1>
+      <p class="lead reveal" data-delay="160">
+        ดูผังห้องว่างแบบเรียลไทม์ คำนวณค่าใช้จ่ายวันโอนได้ครบทุกบาท
+        และจองออนไลน์พร้อมรับใบจองอิเล็กทรอนิกส์ภายใน 5 นาที ไม่ต้องเดินทางไปสำนักงานขาย
+      </p>
+      <div class="hero-cta reveal" data-delay="240">
+        <a class="btn btn-primary btn-lg" href="units.html">ดูห้องว่างทั้งหมด</a>
+        <a class="btn btn-ghost btn-lg" href="#calc">คำนวณค่าผ่อน</a>
+      </div>
+      <div class="hero-trust reveal" data-delay="300">
+        <span>✓ ใบอนุญาตจัดสรรครบถ้วน</span>
+        <span>✓ EIA ผ่านแล้วทุกโครงการ</span>
+        <span>✓ เงินจองคุ้มครองตาม สคบ.</span>
+        <span>✓ ข้อมูลปลอดภัยตาม PDPA</span>
+      </div>
+    </div>
+
+    <!-- building visual — รูปจริง (assets/img/hero-tower.*) ทับตึก CSS อัตโนมัติเมื่อมีไฟล์ -->
+    <div class="ph hero-media reveal" data-delay="360">
+      <img class="ph-img" src="assets/img/hero-tower.jpg" alt="อาคาร NIRA Residence ยามพลบค่ำ"
+           decoding="async" data-img="hero-tower" data-ext="0" onload="phOn(this)" onerror="phFallback(this)">
+      <div class="tower-stage">
+        <div class="tower tower-a" id="tw1"></div>
+        <div class="tower tower-b" id="tw2"></div>
+        <div class="tower tower-c" id="tw3"></div>
+        <div class="stage-floor"></div>
+      </div>
+
+      <div class="float-card fc-1">
+        <div class="tiny muted">ห้องว่างวันนี้</div>
+        <div style="font-size:24px;font-weight:700" id="heroAvail">—</div>
+        <div class="tiny accent">3 โครงการ · อัปเดตเรียลไทม์</div>
+      </div>
+      <div class="float-card fc-2" style="min-width:210px">
+        <div class="row-between" style="margin-bottom:9px">
+          <span class="tiny muted">A-2405 · 1 Bedroom Plus</span><span class="badge badge-ok">ว่าง</span>
+        </div>
+        <div style="font-size:20px;font-weight:700">฿8,932,000</div>
+        <div class="tiny muted">45 ตร.ม. · ชั้น 24 · วิวสระ</div>
+      </div>
+      <div class="float-card fc-3" style="min-width:200px">
+        <div class="tiny muted">ผ่อนเริ่มต้น</div>
+        <div style="font-size:20px;font-weight:700">฿19,900<span class="tiny muted"> /เดือน</span></div>
+        <div class="tiny muted">ดอกเบี้ย 3.15% · 30 ปี</div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- ================= STATS ================= -->
+<section class="section-sm">
+  <div class="wrap">
+    <h2 class="center reveal" style="max-width:760px;margin-inline:auto">ตัวเลขที่บอกเรื่องราวของเรา<br>การเติบโต ความไว้วางใจ และผลลัพธ์</h2>
+    <div class="grid g4" style="margin-top:56px">
+      <div class="stat center reveal"><div class="v"><span data-count="12" data-prefix="" data-suffix="">0</span></div><div class="k">โครงการที่ส่งมอบแล้ว</div></div>
+      <div class="stat center reveal stat-divide" data-delay="80"><div class="v"><span data-count="4820" data-suffix="+">0</span></div><div class="k">ครอบครัวที่เลือกเรา</div></div>
+      <div class="stat center reveal stat-divide" data-delay="160"><div class="v">฿<span data-count="18.6" data-dec="1" data-suffix="B">0</span></div><div class="k">มูลค่าที่โอนกรรมสิทธิ์แล้ว</div></div>
+      <div class="stat center reveal stat-divide" data-delay="240"><div class="v">⭐ <span data-count="4.8" data-dec="1">0</span></div><div class="k">คะแนนความพึงพอใจลูกบ้าน</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= BENTO FEATURES ================= -->
+<section class="section" id="features">
+  <div class="wrap">
+    <div class="center reveal" style="max-width:700px;margin:0 auto 56px">
+      <span class="eyebrow">ทำไมต้อง NIRA</span>
+      <h2>ซื้อคอนโดให้เหมือนซื้อของออนไลน์</h2>
+      <p class="lead" style="margin:18px auto 0">
+        ข้อมูลครบตั้งแต่ผังห้อง ทิศ วิว ราคาต่อตารางเมตร ไปจนถึงค่าใช้จ่ายวันโอนและค่าส่วนกลางรายเดือน — ไม่มีอะไรซ่อนไว้
+      </p>
+    </div>
+
+    <div class="bento">
+      <div class="card card-hover b-wide reveal">
+        <div class="ph b-media no-scrim">
+          <img class="ph-img" src="assets/img/feature-availability.jpg" alt="ผังห้องว่างแบบเรียลไทม์"
+               loading="lazy" decoding="async" data-img="feature-availability" data-ext="0" onload="phOn(this)" onerror="phFallback(this)">
+          <span class="ph-label">Live Availability Board</span>
+          <div class="glow glow-lime glow-sm" style="left:-60px;bottom:-90px"></div>
+        </div>
+        <div class="b-body">
+          <div class="itile itile-ghost" style="margin-bottom:14px">📊</div>
+          <h3>ผังห้องว่างแบบเรียลไทม์</h3>
+          <p style="margin-top:9px">เห็นทุกยูนิตทั้งตึก แยกตามชั้น ทิศ วิว และสถานะ ว่าง/จองแล้ว/ขายแล้ว อัปเดตทันทีที่เซลส์กดจอง</p>
+        </div>
+      </div>
+
+      <div class="card card-hover b-wide reveal" data-delay="90">
+        <div class="ph b-media no-scrim">
+          <img class="ph-img" src="assets/img/feature-cost.jpg" alt="ตารางแจกแจงค่าใช้จ่ายวันโอน"
+               loading="lazy" decoding="async" data-img="feature-cost" data-ext="0" onload="phOn(this)" onerror="phFallback(this)">
+          <span class="ph-label">Cost Breakdown</span>
+        </div>
+        <div class="b-body">
+          <div class="itile itile-ghost" style="margin-bottom:14px">🧾</div>
+          <h3>ค่าใช้จ่ายวันโอนครบทุกบาท</h3>
+          <p style="margin-top:9px">ค่าธรรมเนียมโอน ค่าจดจำนอง ค่าส่วนกลางล่วงหน้า เงินกองทุน ค่ามิเตอร์ — คำนวณอัตโนมัติจากราคาห้องที่คุณเลือก</p>
+        </div>
+      </div>
+
+      <div class="card card-hover reveal">
+        <div class="b-body" style="padding:26px">
+          <div class="itile" style="margin-bottom:16px">💳</div>
+          <h3 style="font-size:19px">แผนผ่อนดาวน์ยืดหยุ่น</h3>
+          <p class="tiny" style="margin-top:9px">เลือกจำนวนงวดได้ พร้อมตารางวันครบกำหนดรายงวด</p>
+        </div>
+      </div>
+      <div class="card card-hover reveal" data-delay="70">
+        <div class="b-body" style="padding:26px">
+          <div class="itile" style="margin-bottom:16px">🏦</div>
+          <h3 style="font-size:19px">ยื่นกู้ 4 ธนาคารพร้อมกัน</h3>
+          <p class="tiny" style="margin-top:9px">ทีมสินเชื่อช่วยเตรียมเอกสารและติดตามผลอนุมัติให้</p>
+        </div>
+      </div>
+      <div class="card card-hover reveal" data-delay="140">
+        <div class="b-body" style="padding:26px">
+          <div class="itile" style="margin-bottom:16px">🗓</div>
+          <h3 style="font-size:19px">นัดชมห้องออนไลน์</h3>
+          <p class="tiny" style="margin-top:9px">เลือกวัน-เวลาเอง หรือขอ Video Call พาชมห้องจริง</p>
+        </div>
+      </div>
+      <div class="card card-hover reveal" data-delay="210">
+        <div class="b-body" style="padding:26px">
+          <div class="itile" style="margin-bottom:16px">🔒</div>
+          <h3 style="font-size:19px">ปลอดภัยตาม PDPA</h3>
+          <p class="tiny" style="margin-top:9px">เอกสารและข้อมูลส่วนบุคคลเข้ารหัส ขอลบได้ทุกเมื่อ</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= 4x HIGHLIGHT ================= -->
+<section class="section-sm">
+  <div class="wrap">
+    <div class="card reveal" style="padding:0;overflow:hidden">
+      <div class="grid g2" style="gap:0">
+        <div style="padding:56px 44px;display:flex;flex-direction:column;justify-content:center">
+          <div style="font-size:clamp(64px,8vw,110px);font-weight:800;letter-spacing:-.05em;line-height:1;color:var(--accent)">4×</div>
+          <h3 style="margin:20px 0 12px;font-size:26px">ปิดการขายเร็วขึ้น 4 เท่า</h3>
+          <p>จากเดิมลูกค้าต้องเดินทางมาสำนักงานขาย 3–4 ครั้งกว่าจะตัดสินใจ ระบบจองออนไลน์ของเราย่นเวลาเหลือเฉลี่ย 2 วัน 6 ชั่วโมง นับจากดูห้องครั้งแรกจนออกใบจอง</p>
+          <div class="grid g2" style="margin-top:32px;gap:20px">
+            <div><div class="row" style="gap:12px"><div class="itile itile-ghost">⚡</div><div><h4>เห็นราคาสุทธิทันที</h4><p class="tiny">รวมส่วนลดและโปรโมชั่นแล้ว</p></div></div></div>
+            <div><div class="row" style="gap:12px"><div class="itile itile-ghost">📄</div><div><h4>ใบจองอิเล็กทรอนิกส์</h4><p class="tiny">ออกให้อัตโนมัติหลังชำระ</p></div></div></div>
+          </div>
+        </div>
+        <div class="ph no-scrim" style="min-height:420px">
+          <img class="ph-img" src="assets/img/feature-funnel.jpg" alt="แดชบอร์ด Sales Funnel"
+               loading="lazy" decoding="async" data-img="feature-funnel" data-ext="0" onload="phOn(this)" onerror="phFallback(this)">
+          <span class="ph-label">Sales Funnel Dashboard</span>
+          <div class="glow glow-lime glow-sm" style="right:-40px;top:-40px"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= PROJECTS ================= -->
+<section class="section" id="projects">
+  <div class="wrap">
+    <div class="row-between wrapflex reveal" style="margin-bottom:44px;align-items:flex-end">
+      <div style="max-width:620px">
+        <span class="eyebrow">โครงการของเรา</span>
+        <h2>เลือกทำเลที่ใช่สำหรับชีวิตคุณ</h2>
+      </div>
+      <a class="btn btn-ghost" href="units.html">ดูห้องว่างทั้งหมด →</a>
+    </div>
+    <div class="grid g3" id="projectList"></div>
+  </div>
+</section>
+
+<!-- ================= PURCHASE JOURNEY ================= -->
+<section class="section" style="background:var(--bg-soft);border-block:1px solid var(--line)">
+  <div class="wrap">
+    <div class="center reveal" style="max-width:720px;margin:0 auto 52px">
+      <span class="eyebrow">ขั้นตอนการซื้อ</span>
+      <h2>7 ขั้นตอน ตั้งแต่เลือกห้องจนรับกุญแจ</h2>
+      <p class="lead" style="margin:18px auto 0">ทุกขั้นตอนติดตามสถานะได้จากหน้า “บัญชีของฉัน” และมีเจ้าหน้าที่ดูแลประจำห้องคุณ</p>
+    </div>
+    <div class="journey">
+      <div class="jstep reveal"><div class="n">1</div><h4>เลือกห้อง</h4><p class="tiny" style="margin-top:8px">กรองตามงบ ขนาด ชั้น ทิศ วิว แล้วดูผังห้องจริง</p></div>
+      <div class="jstep reveal" data-delay="60"><div class="n">2</div><h4>นัดชม / ปรึกษา</h4><p class="tiny" style="margin-top:8px">ชมห้องตัวอย่างที่โครงการ หรือ Video Call</p></div>
+      <div class="jstep reveal" data-delay="120"><div class="n">3</div><h4>วางเงินจอง</h4><p class="tiny" style="margin-top:8px">ชำระออนไลน์ ได้รับใบจองทันที ห้องถูกล็อกให้ 7 วัน</p></div>
+      <div class="jstep reveal" data-delay="180"><div class="n">4</div><h4>ทำสัญญาจะซื้อจะขาย</h4><p class="tiny" style="margin-top:8px">เซ็นสัญญา + ชำระเงินทำสัญญาภายใน 7 วัน</p></div>
+      <div class="jstep reveal" data-delay="240"><div class="n">5</div><h4>ผ่อนดาวน์</h4><p class="tiny" style="margin-top:8px">ชำระตามงวดที่ตกลง ดูตารางและใบเสร็จย้อนหลังได้</p></div>
+      <div class="jstep reveal" data-delay="300"><div class="n">6</div><h4>ยื่นสินเชื่อ</h4><p class="tiny" style="margin-top:8px">ทีมสินเชื่อยื่นให้พร้อมกันหลายธนาคาร</p></div>
+      <div class="jstep reveal" data-delay="360"><div class="n">7</div><h4>ตรวจรับ &amp; โอนกรรมสิทธิ์</h4><p class="tiny" style="margin-top:8px">ตรวจห้อง แจ้งแก้ไข แล้วนัดโอนที่กรมที่ดิน</p></div>
+      <div class="jstep reveal" data-delay="420" style="border-color:rgba(214,255,102,.35);background:linear-gradient(160deg,rgba(214,255,102,.07),var(--surface))">
+        <div class="n" style="background:var(--accent);color:#0A0A0A;border-color:transparent">🔑</div>
+        <h4>รับกุญแจ</h4><p class="tiny" style="margin-top:8px">พร้อมคู่มือลูกบ้านและการรับประกันโครงสร้าง 5 ปี</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= LOAN CALCULATOR ================= -->
+<section class="section" id="calc">
+  <div class="wrap">
+    <div class="calc-grid">
+      <div class="reveal">
+        <span class="eyebrow">เครื่องมือช่วยตัดสินใจ</span>
+        <h2>คำนวณค่าผ่อนก่อนตัดสินใจ</h2>
+        <p class="lead" style="margin-top:18px">ปรับราคาห้อง เงินดาวน์ ดอกเบี้ย และระยะเวลาผ่อน เพื่อดูว่าคุณต้องมีรายได้เท่าไหร่จึงจะผ่านเกณฑ์ธนาคาร</p>
+
+        <div class="grid" style="gap:26px;margin-top:34px">
+          <div class="field">
+            <label>ราคาห้อง <b class="accent" id="lPrice">฿6,000,000</b></label>
+            <input type="range" id="rPrice" min="1500000" max="30000000" step="100000" value="6000000">
+          </div>
+          <div class="field">
+            <label>เงินดาวน์ <b class="accent" id="lDown">15% · ฿900,000</b></label>
+            <input type="range" id="rDown" min="0" max="50" step="1" value="15">
+          </div>
+          <div class="field">
+            <label>อัตราดอกเบี้ยเฉลี่ย <b class="accent" id="lRate">3.15%</b></label>
+            <input type="range" id="rRate" min="2" max="7" step="0.05" value="3.15">
+          </div>
+          <div class="field">
+            <label>ระยะเวลาผ่อน <b class="accent" id="lYears">30 ปี</b></label>
+            <input type="range" id="rYears" min="5" max="40" step="1" value="30">
+          </div>
+        </div>
+      </div>
+
+      <div class="card reveal" data-delay="100" style="padding:34px">
+        <div class="glow glow-lime glow-sm" style="right:-100px;top:-120px"></div>
+        <div class="rel">
+          <div class="tiny muted">ผ่อนชำระโดยประมาณ</div>
+          <div style="font-size:clamp(38px,5vw,54px);font-weight:700;letter-spacing:-.03em;line-height:1.1" id="oMonthly">฿0</div>
+          <div class="tiny muted" style="margin-bottom:26px">ต่อเดือน (แบบลดต้นลดดอก)</div>
+
+          <div class="kv"><span class="k">วงเงินกู้</span><span class="v" id="oLoan">-</span></div>
+          <div class="kv"><span class="k">เงินดาวน์ที่ต้องเตรียม</span><span class="v" id="oDown">-</span></div>
+          <div class="kv"><span class="k">ดอกเบี้ยรวมตลอดสัญญา</span><span class="v" id="oInterest">-</span></div>
+          <div class="kv"><span class="k">ยอดชำระรวมทั้งหมด</span><span class="v" id="oTotal">-</span></div>
+          <div class="kv total"><span class="k">รายได้ขั้นต่ำที่ควรมี</span><span class="v" id="oIncome">-</span></div>
+          <p class="tiny" style="margin-top:18px;color:var(--muted-2)">
+            * ประมาณการเบื้องต้น ธนาคารส่วนใหญ่กำหนดภาระผ่อนไม่เกิน 40% ของรายได้ต่อเดือน
+            อัตราดอกเบี้ยจริงขึ้นกับผลอนุมัติของแต่ละธนาคาร
+          </p>
+          <a class="btn btn-primary btn-block" style="margin-top:22px" href="units.html">ดูห้องที่อยู่ในงบนี้</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= TESTIMONIALS ================= -->
+<section class="section" style="background:var(--bg-soft);border-block:1px solid var(--line)">
+  <div class="wrap">
+    <div class="center reveal" style="max-width:640px;margin:0 auto 48px">
+      <span class="eyebrow">เสียงจากลูกบ้าน</span>
+      <h2>คนที่ย้ายเข้าแล้วพูดถึงเราว่าอย่างไร</h2>
+    </div>
+    <div class="grid g3">
+      <div class="tcard reveal">
+        <div class="accent">★★★★★</div>
+        <p>“ชอบตรงที่เห็นราคาสุทธิกับค่าใช้จ่ายวันโอนตั้งแต่ก่อนจอง ไม่มีค่าใช้จ่ายงอกทีหลังเลย วางแผนเงินได้ง่ายมาก”</p>
+        <div class="row" style="gap:12px;margin-top:auto"><div class="avatar"><img class="ph-img" src="assets/img/avatar-1.jpg" alt="ธนกฤต ว." loading="lazy" decoding="async" data-img="avatar-1" data-ext="0" onload="phOn(this)" onerror="phFallback(this)">ธ</div><div><div style="font-weight:600;font-size:14.5px">ธนกฤต ว.</div><div class="tiny muted">วิศวกรซอฟต์แวร์ · NIRA สุขุมวิท 39</div></div></div>
+      </div>
+      <div class="tcard reveal" data-delay="80">
+        <div class="accent">★★★★★</div>
+        <p>“ซื้อไว้ปล่อยเช่า ทีมงานช่วยดูเรื่องผู้เช่าและยอดค่าส่วนกลางให้ครบ ระบบดูตารางผ่อนดาวน์ในเว็บสะดวกมาก”</p>
+        <div class="row" style="gap:12px;margin-top:auto"><div class="avatar"><img class="ph-img" src="assets/img/avatar-2.jpg" alt="ปาริชาต อ." loading="lazy" decoding="async" data-img="avatar-2" data-ext="0" onload="phOn(this)" onerror="phFallback(this)">ป</div><div><div style="font-weight:600;font-size:14.5px">ปาริชาต อ.</div><div class="tiny muted">เจ้าของกิจการ · NIRA เดอะ ริเวอร์</div></div></div>
+      </div>
+      <div class="tcard reveal" data-delay="160">
+        <div class="accent">★★★★☆</div>
+        <p>“As a foreigner, the foreign-quota tracker was the reason I chose NIRA. Everything was transparent from day one.”</p>
+        <div class="row" style="gap:12px;margin-top:auto"><div class="avatar"><img class="ph-img" src="assets/img/avatar-3.jpg" alt="Kenji W." loading="lazy" decoding="async" data-img="avatar-3" data-ext="0" onload="phOn(this)" onerror="phFallback(this)">K</div><div><div style="font-weight:600;font-size:14.5px">Kenji W.</div><div class="tiny muted">Expat Manager · NIRA สุขุมวิท 39</div></div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= PRICING / PAYMENT PLANS ================= -->
+<section class="section" id="pricing">
+  <div class="wrap">
+    <div class="center reveal" style="max-width:680px;margin:0 auto 52px">
+      <span class="eyebrow">แผนการชำระเงิน</span>
+      <h2>โปร่งใส ตรงไปตรงมา</h2>
+      <p class="lead" style="margin:18px auto 0">เลือกแผนที่เหมาะกับกระแสเงินสดของคุณ ทุกแผนใช้ราคาห้องเดียวกัน ต่างกันแค่จังหวะการจ่าย</p>
+    </div>
+
+    <div class="grid g3">
+      <div class="card plan reveal">
+        <div><div class="tiny muted">แผน A</div><h3 style="margin-top:6px">ผ่อนสบาย</h3></div>
+        <div><span style="font-size:38px;font-weight:700;letter-spacing:-.03em">15%</span><span class="muted"> ดาวน์</span></div>
+        <p class="tiny">เหมาะกับผู้ซื้ออยู่เองที่ต้องการแบ่งจ่ายยาว</p>
+        <hr class="divider">
+        <ul>
+          <li>เงินจอง ฿50,000</li>
+          <li>ทำสัญญา 5% ของราคาห้อง</li>
+          <li>ผ่อนดาวน์ 12 งวด</li>
+          <li>ยอดโอน ~80% ยื่นสินเชื่อ</li>
+          <li>ฟรีค่าส่วนกลาง 1 ปี</li>
+        </ul>
+        <a class="btn btn-ghost btn-block" href="units.html" style="margin-top:auto">เลือกแผนนี้</a>
+      </div>
+
+      <div class="card plan featured reveal" data-delay="80">
+        <div class="row-between"><div><div class="tiny muted">แผน B</div><h3 style="margin-top:6px">ยอดนิยม</h3></div><span class="badge badge-accent">แนะนำ</span></div>
+        <div><span style="font-size:38px;font-weight:700;letter-spacing:-.03em">10%</span><span class="muted"> ดาวน์</span></div>
+        <p class="tiny">ดาวน์น้อย เก็บเงินสดไว้ตกแต่งและค่าโอน</p>
+        <hr class="divider">
+        <ul>
+          <li>เงินจอง ฿30,000</li>
+          <li>ทำสัญญา 5% ของราคาห้อง</li>
+          <li>ผ่อนดาวน์ 6 งวด</li>
+          <li>ยอดโอน ~85% ยื่นสินเชื่อ</li>
+          <li>ฟรีค่าส่วนกลาง 2 ปี + เฟอร์นิเจอร์</li>
+          <li>ทีมสินเชื่อยื่นให้ 4 ธนาคาร</li>
+        </ul>
+        <a class="btn btn-primary btn-block" href="units.html" style="margin-top:auto">เลือกแผนนี้</a>
+      </div>
+
+      <div class="card plan reveal" data-delay="160">
+        <div><div class="tiny muted">แผน C</div><h3 style="margin-top:6px">เงินสด</h3></div>
+        <div><span style="font-size:38px;font-weight:700;letter-spacing:-.03em">−7%</span><span class="muted"> ส่วนลด</span></div>
+        <p class="tiny">ชำระเต็มจำนวนภายใน 30 วัน รับส่วนลดสูงสุด</p>
+        <hr class="divider">
+        <ul>
+          <li>เงินจอง ฿50,000</li>
+          <li>ชำระส่วนที่เหลือภายใน 30 วัน</li>
+          <li>ส่วนลดเงินสด 7%</li>
+          <li>ฟรีค่าโอนฝั่งผู้ซื้อทั้งหมด</li>
+          <li>ฟรีค่าส่วนกลาง 3 ปี</li>
+        </ul>
+        <a class="btn btn-ghost btn-block" href="units.html" style="margin-top:auto">เลือกแผนนี้</a>
+      </div>
+    </div>
+
+    <p class="center tiny muted" style="margin-top:28px">
+      ราคาและเงื่อนไขอาจเปลี่ยนแปลงตามรอบการขาย · ค่าใช้จ่ายวันโอนคำนวณแยกในหน้ารายละเอียดห้อง
+    </p>
+  </div>
+</section>
+
+<!-- ================= FAQ ================= -->
+<section class="section" id="faq" style="background:var(--bg-soft);border-block:1px solid var(--line)">
+  <div class="wrap" style="max-width:920px">
+    <div class="center reveal" style="margin-bottom:44px">
+      <span class="eyebrow">คำถามที่พบบ่อย</span>
+      <h2>เรื่องที่คนซื้อคอนโดถามมากที่สุด</h2>
+    </div>
+    <div id="faqList"></div>
+  </div>
+</section>
+
+<!-- ================= CTA ================= -->
+<section class="section">
+  <div class="wrap">
+    <div class="cta-box reveal">
+      <div class="glow glow-lime glow-lg" style="right:-160px;top:-260px"></div>
+      <div class="rel">
+        <h2 style="max-width:640px;margin-inline:auto">พร้อมเลือกห้องของคุณแล้วหรือยัง</h2>
+        <p class="lead" style="margin:20px auto 0;text-align:center">ใช้เวลาไม่ถึง 5 นาที ตั้งแต่เลือกห้องจนได้ใบจองอิเล็กทรอนิกส์</p>
+        <div class="hero-cta" style="margin-top:32px">
+          <a class="btn btn-primary btn-lg" href="units.html">เริ่มเลือกห้อง</a>
+          <a class="btn btn-ghost btn-lg" href="account.html">ติดตามการจองเดิม</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script>
+/* ---------- towers: random lit windows ---------- */
+['tw1','tw2','tw3'].forEach(id=>{
+  const t=document.getElementById(id); if(!t) return;
+  const n=Math.floor(t.offsetHeight/26)*3;
+  for(let i=0;i<n;i++){
+    if(Math.random()>.42) continue;
+    const d=document.createElement('i'); d.className='lit';
+    d.style.left=(8+Math.random()*88)+'%';
+    d.style.top=(6+Math.random()*88)+'%';
+    d.style.opacity=(.35+Math.random()*.6).toFixed(2);
+    t.appendChild(d);
+  }
+});
+
+/* ---------- hero available count ---------- */
+document.getElementById('heroAvail').textContent =
+  Store.units().filter(u=>u.status==='Available').length + ' ห้อง';
+
+/* ---------- project cards ---------- */
+document.getElementById('projectList').innerHTML = Store.projects().map((p,i)=>{
+  const avail = Store.units({projectId:p.id}).filter(u=>u.status==='Available').length;
+  return `
+  <a class="card card-hover card-pad-0 reveal" data-delay="${i*80}" href="units.html?project=${p.id}" style="display:block">
+    <div class="ph" style="aspect-ratio:16/11">
+      ${imgTag(imgKey.project(p), p.nameTh + ' — ' + p.tagline)}
+      <span class="ph-label">${p.heroLabel}</span>
+      <div style="position:absolute;top:14px;left:14px;z-index:2">${badge(p.status)}</div>
+      <div style="position:absolute;bottom:14px;left:14px;z-index:2"><span class="badge">${p.transit[0].line} ${p.transit[0].station} · เดิน ${p.transit[0].walkMin} นาที</span></div>
+    </div>
+    <div style="padding:24px">
+      <h3 style="font-size:20px">${p.nameTh}</h3>
+      <p class="tiny" style="margin:8px 0 16px">${p.tagline}</p>
+      <div class="row wrapflex tiny muted" style="gap:12px;margin-bottom:16px">
+        <span>🏢 ${p.floors} ชั้น</span><span>🏠 ${p.totalUnits} ยูนิต</span><span>🚗 ที่จอด ${p.parkingRatioPct}%</span>
+      </div>
+      <hr class="divider">
+      <div class="row-between" style="margin-top:16px">
+        <div><div class="tiny muted">เริ่มต้น</div><div style="font-size:19px;font-weight:700">${fmt.baht(p.priceFrom)}</div></div>
+        <div style="text-align:right"><div class="tiny muted">ห้องว่าง</div><div style="font-size:19px;font-weight:700" class="accent">${avail}</div></div>
+      </div>
+    </div>
+  </a>`;
+}).join('');
+
+/* ---------- calculator ---------- */
+const R = id => document.getElementById(id);
+function calc(){
+  const price=+R('rPrice').value, downPct=+R('rDown').value, rate=+R('rRate').value, years=+R('rYears').value;
+  const down=Math.round(price*downPct/100), loan=price-down;
+  const m = loan>0 ? monthlyPayment(loan,rate,years) : 0;
+  const total=m*years*12, interest=total-loan;
+  R('lPrice').textContent=fmt.baht(price);
+  R('lDown').textContent=downPct+'% · '+fmt.baht(down);
+  R('lRate').textContent=rate.toFixed(2)+'%';
+  R('lYears').textContent=years+' ปี';
+  R('oMonthly').textContent=fmt.baht(Math.round(m));
+  R('oLoan').textContent=fmt.baht(loan);
+  R('oDown').textContent=fmt.baht(down);
+  R('oInterest').textContent=fmt.baht(Math.round(interest));
+  R('oTotal').textContent=fmt.baht(Math.round(total+down));
+  R('oIncome').textContent=fmt.baht(requiredIncome(m))+'/ด.';
+}
+['rPrice','rDown','rRate','rYears'].forEach(id=>R(id).addEventListener('input',calc));
+calc();
+
+/* ---------- FAQ ---------- */
+const FAQ=[
+  ['เงินจองกับเงินทำสัญญาต่างกันอย่างไร คืนได้ไหม?',
+   'เงินจองคือเงินที่วางเพื่อล็อกห้องไว้ให้คุณ (โดยทั่วไป 7 วัน) ส่วนเงินทำสัญญาคือเงินก้อนที่ชำระในวันเซ็นสัญญาจะซื้อจะขาย ซึ่งจะถูกนำไปหักจากราคาห้องทั้งหมด ตามสัญญามาตรฐาน สคบ. หากผู้ซื้อยกเลิกเองโดยที่โครงการไม่ได้ผิดสัญญา เงินจองและเงินทำสัญญาจะถูกริบ แต่หากโครงการสร้างไม่เสร็จตามกำหนดหรือผิดเงื่อนไขสาระสำคัญ ผู้ซื้อมีสิทธิ์บอกเลิกสัญญาและขอเงินคืนพร้อมดอกเบี้ยได้'],
+  ['ค่าใช้จ่ายวันโอนมีอะไรบ้าง ประมาณเท่าไหร่?',
+   'ประกอบด้วย ค่าธรรมเนียมการโอน (ปกติ 2% ของราคาประเมิน มักแบ่งกันคนละครึ่ง), ค่าจดจำนอง 1% ของวงเงินกู้, ค่าส่วนกลางล่วงหน้า 1 ปี, เงินกองทุนส่วนกลาง (Sinking Fund) จ่ายครั้งเดียว, ค่ามิเตอร์ไฟฟ้า-น้ำประปาพร้อมเงินประกัน และค่าประกันภัยส่วนกลาง สำหรับที่อยู่อาศัยราคาไม่เกิน 7 ล้านบาท มีมาตรการรัฐลดค่าโอนและค่าจดจำนองเหลือ 0.01% ระบบของเราจะคำนวณให้อัตโนมัติในหน้ารายละเอียดห้อง'],
+  ['ค่าส่วนกลางกับเงินกองทุนต่างกันอย่างไร?',
+   'ค่าส่วนกลาง (Common Fee) คิดเป็นบาทต่อตารางเมตรต่อเดือน จ่ายต่อเนื่องตลอดการเป็นเจ้าของ ใช้ดูแลพื้นที่ส่วนกลาง รปภ. แม่บ้าน ไฟฟ้าส่วนกลาง ส่วนเงินกองทุนส่วนกลาง (Sinking Fund) เก็บครั้งเดียวในวันโอน เป็นเงินสำรองสำหรับซ่อมใหญ่ เช่น เปลี่ยนลิฟต์ ทาสีอาคาร ทั้งสองรายการระบุไว้ในหน้ารายละเอียดของทุกห้อง'],
+  ['ชาวต่างชาติซื้อได้หรือไม่?',
+   'ได้ ตามพระราชบัญญัติอาคารชุด ชาวต่างชาติสามารถถือกรรมสิทธิ์ห้องชุดได้ไม่เกิน 49% ของพื้นที่ขายทั้งโครงการ (Foreign Quota) โดยต้องโอนเงินเข้ามาจากต่างประเทศเป็นเงินตราต่างประเทศและมีหนังสือรับรองจากธนาคาร (FET/Credit Advice) หน้ารายละเอียดโครงการจะแสดงโควตาคงเหลือแบบเรียลไทม์'],
+  ['พื้นที่ใช้สอยรวมระเบียงหรือไม่?',
+   'ราคาที่แสดงคำนวณจากพื้นที่ใช้สอยตามที่ระบุในสัญญา ซึ่งรวมพื้นที่ระเบียงตามมาตรฐานการวัดของกรมที่ดิน เราแยกแสดงพื้นที่ห้องและพื้นที่ระเบียงให้ชัดเจนในทุกยูนิต เพื่อให้เปรียบเทียบราคาต่อตารางเมตรได้อย่างเป็นธรรม'],
+  ['หากกู้ไม่ผ่านจะเกิดอะไรขึ้น?',
+   'ทีมสินเชื่อจะช่วยยื่นซ้ำกับธนาคารอื่นและช่วยปรับโครงสร้างเอกสาร เช่น เพิ่มผู้กู้ร่วม หรือขยายระยะเวลาผ่อน หากยังไม่ผ่านทุกธนาคาร คุณสามารถขอเปลี่ยนไปห้องราคาต่ำลงในโครงการเดียวกันได้ โดยโอนยอดที่ชำระไปแล้วทั้งหมดไปยังห้องใหม่ ภายใต้เงื่อนไขที่ระบุในสัญญา'],
+  ['ตรวจรับห้อง (Defect Inspection) ทำอย่างไร?',
+   'ก่อนวันโอน 14–30 วัน เราจะนัดคุณเข้าตรวจรับห้อง คุณสามารถพาช่างตรวจบ้านอิสระเข้าไปได้ รายการที่พบจะบันทึกลงระบบและติดตามสถานะการแก้ไขได้จากหน้า “บัญชีของฉัน” จนกว่าจะปิดงานครบทุกรายการจึงนัดโอน']
+];
+document.getElementById('faqList').innerHTML = FAQ.map((f,i)=>`
+  <div class="faq-item reveal" data-delay="${i*40}">
+    <button class="faq-q" onclick="toggleFaq(this)"><span>${f[0]}</span><span class="ico">+</span></button>
+    <div class="faq-a"><p>${f[1]}</p></div>
+  </div>`).join('');
+function toggleFaq(btn){
+  const item=btn.parentElement, a=item.querySelector('.faq-a');
+  const open=item.classList.toggle('open');
+  a.style.maxHeight = open ? a.scrollHeight+'px' : 0;
+}
+
+renderFooter();
+initReveal(); initCounters();
+</script>
+</body>
+</html>
